@@ -1,0 +1,713 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Calculadora de Rendimento</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        body {
+            background: #f2f4f7;
+            min-height: 100vh;
+            padding: 30px 15px;
+        }
+
+        .container {
+            max-width: 850px;
+            margin: auto;
+        }
+
+        .cabecalho {
+            background: #ffffff;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        .cabecalho h1 {
+            font-size: 28px;
+            color: #333333;
+            margin-bottom: 8px;
+        }
+
+        .cabecalho p {
+            color: #777777;
+            font-size: 15px;
+        }
+
+        .card {
+            background: #ffffff;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        .titulo {
+            font-size: 19px;
+            font-weight: bold;
+            color: #333333;
+            margin-bottom: 20px;
+            border-left: 5px solid #e30613;
+            padding-left: 10px;
+        }
+
+        .campo {
+            margin-bottom: 20px;
+        }
+
+        .campo label {
+            display: block;
+            font-weight: bold;
+            color: #444444;
+            margin-bottom: 8px;
+        }
+
+        .campo input {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid #cccccc;
+            border-radius: 8px;
+            font-size: 17px;
+            outline: none;
+        }
+
+        .campo input:focus {
+            border-color: #e30613;
+            box-shadow: 0 0 0 2px rgba(227,6,19,0.1);
+        }
+
+        .familias {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .familia {
+            padding: 14px 8px;
+            border: 2px solid #dddddd;
+            background: #ffffff;
+            border-radius: 9px;
+            cursor: pointer;
+            font-weight: bold;
+            color: #444444;
+            transition: 0.2s;
+        }
+
+        .familia:hover {
+            border-color: #e30613;
+            color: #e30613;
+        }
+
+        .familia.selecionada {
+            background: #e30613;
+            border-color: #e30613;
+            color: #ffffff;
+        }
+
+        .botao-calcular {
+            width: 100%;
+            padding: 17px;
+            background: #e30613;
+            border: none;
+            border-radius: 9px;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .botao-calcular:hover {
+            background: #c90010;
+        }
+
+        .resultado {
+            display: none;
+        }
+
+        .resultado-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .resultado-item {
+            background: #f5f6f8;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .resultado-item .descricao {
+            font-size: 14px;
+            color: #777777;
+            margin-bottom: 8px;
+        }
+
+        .resultado-item .valor {
+            font-size: 26px;
+            font-weight: bold;
+            color: #333333;
+        }
+
+        .resultado-destaque {
+            background: #333333;
+            color: #ffffff;
+        }
+
+        .resultado-destaque .descricao {
+            color: #dddddd;
+        }
+
+        .resultado-destaque .valor {
+            color: #ffffff;
+            font-size: 32px;
+        }
+
+        .erro {
+            display: none;
+            background: #ffe5e5;
+            color: #b00000;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .familia-escolhida {
+            margin-top: 15px;
+            text-align: center;
+            font-weight: bold;
+            color: #555555;
+        }
+
+        @media (max-width: 650px) {
+
+            .familias {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .resultado-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .cabecalho h1 {
+                font-size: 23px;
+            }
+
+        }
+
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="cabecalho">
+        <h1>Calculadora de Rendimento</h1>
+        <p>Balanço de Massa e Indicador B100</p>
+    </div>
+
+
+    <!-- ============================= -->
+    <!-- METAS DAS FAMÍLIAS             -->
+    <!-- ALTERE OS VALORES ABAIXO       -->
+    <!-- ============================= -->
+
+    <script>
+
+        const metas = {
+
+            "Asa": 7.40,
+            "Cabeça": 2.00,
+            "Cartilagem": 0.20,
+            "CMS": 10.20,
+            "Coração": 0.40,
+            "Fígado": 1.90,
+            "Moela": 1.10,
+            "Peito": 20.70,
+            "Perna": 22.20,
+            "Pé": 3.40,
+            "Dorso": 2.00,
+            "Gordura": 0.40,
+            "Sassami": 4.20
+
+        };
+
+    </script>
+
+
+    <!-- DADOS DO ABATE -->
+
+    <div class="card">
+
+        <div class="titulo">
+            Dados do Abate
+        </div>
+
+        <div class="campo">
+
+            <label for="cabecas">
+                Quantidade de cabeças abatidas
+            </label>
+
+            <input
+                type="number"
+                id="cabecas"
+                placeholder="Ex.: 120000"
+                min="0"
+            >
+
+        </div>
+
+
+        <div class="campo">
+
+            <label for="peso">
+
+                Peso médio do frango (kg)
+
+            </label>
+
+            <input
+                type="number"
+                id="peso"
+                placeholder="Ex.: 2,850"
+                min="0"
+                step="0.001"
+            >
+
+        </div>
+
+    </div>
+
+
+    <!-- FAMÍLIA -->
+
+    <div class="card">
+
+        <div class="titulo">
+            Selecione a Família
+        </div>
+
+        <div class="familias">
+
+            <button class="familia" onclick="selecionarFamilia('Asa', this)">
+                Asa
+            </button>
+
+            <button class="familia" onclick="selecionarFamilia('Cabeça', this)">
+                Cabeça
+            </button>
+
+            <button class="familia" onclick="selecionarFamilia('Cartilagem', this)">
+                Cartilagem
+            </button>
+
+            <button class="familia" onclick="selecionarFamilia('CMS', this)">
+                CMS
+            </button>
+
+            <button class="familia" onclick="selecionarFamilia('Coração', this)">
+                Coração
+            </button>
+
+            <button class="familia" onclick="selecionarFamilia('Fígado', this)">
+                Fígado
+            </button>
+
+            <button class="familia" onclick="selecionarFamilia('Moela', this)">
+                Moela
+            </button>
+
+            <button class="familia" onclick="selecionarFamilia('Peito', this)">
+                Peito
+            </button>
+
+            <button class="familia" onclick="selecionarFamilia('Perna', this)">
+                Perna
+            </button>
+
+            <button class="familia" onclick="selecionarFamilia('Pé', this)">
+                Pé
+            </button>
+
+            <button class="familia" onclick="selecionarFamilia('Dorso', this)">
+                Dorso
+            </button>
+
+            <button class="familia" onclick="selecionarFamilia('Gordura', this)">
+                Gordura
+            </button>
+
+            <button class="familia" onclick="selecionarFamilia('Sassami', this)">
+                Sassami
+            </button>
+
+        </div>
+
+        <div class="familia-escolhida" id="familiaEscolhida">
+            Nenhuma família selecionada
+        </div>
+
+    </div>
+
+
+    <!-- PRODUÇÃO -->
+
+    <div class="card">
+
+        <div class="titulo">
+            Produção
+        </div>
+
+        <div class="campo">
+
+            <label for="producao">
+                Produção da família (kg)
+            </label>
+
+            <input
+                type="number"
+                id="producao"
+                placeholder="Ex.: 8500"
+                min="0"
+                step="0.001"
+            >
+
+        </div>
+
+        <div id="mensagemErro" class="erro"></div>
+
+        <button class="botao-calcular" onclick="calcular()">
+            CALCULAR
+        </button>
+
+    </div>
+
+
+    <!-- RESULTADO -->
+
+    <div class="card resultado" id="resultado">
+
+        <div class="titulo">
+            Resultado
+        </div>
+
+        <div class="resultado-grid">
+
+            <div class="resultado-item">
+
+                <div class="descricao">
+                    Família
+                </div>
+
+                <div class="valor" id="resultadoFamilia">
+                    -
+                </div>
+
+            </div>
+
+
+            <div class="resultado-item">
+
+                <div class="descricao">
+                    Volume de Abate
+                </div>
+
+                <div class="valor" id="resultadoAbate">
+                    -
+                </div>
+
+            </div>
+
+
+            <div class="resultado-item">
+
+                <div class="descricao">
+                    Produção
+                </div>
+
+                <div class="valor" id="resultadoProducao">
+                    -
+                </div>
+
+            </div>
+
+
+            <div class="resultado-item">
+
+                <div class="descricao">
+                    Rendimento / Balanço de Massa
+                </div>
+
+                <div class="valor" id="resultadoRendimento">
+                    -
+                </div>
+
+            </div>
+
+
+            <div class="resultado-item">
+
+                <div class="descricao">
+                    Meta
+                </div>
+
+                <div class="valor" id="resultadoMeta">
+                    -
+                </div>
+
+            </div>
+
+
+            <div class="resultado-item resultado-destaque">
+
+                <div class="descricao">
+                    B100
+                </div>
+
+                <div class="valor" id="resultadoB100">
+                    -
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    let familiaSelecionada = null;
+
+
+    // ==========================================
+    // SELECIONAR FAMÍLIA
+    // ==========================================
+
+    function selecionarFamilia(familia, botao) {
+
+        familiaSelecionada = familia;
+
+        const botoes = document.querySelectorAll(".familia");
+
+        botoes.forEach(function(btn) {
+
+            btn.classList.remove("selecionada");
+
+        });
+
+        botao.classList.add("selecionada");
+
+        document.getElementById("familiaEscolhida").innerText =
+            "Família selecionada: " + familia;
+
+    }
+
+
+    // ==========================================
+    // FORMATAÇÃO DE NÚMEROS
+    // ==========================================
+
+    function formatarNumero(numero, casas) {
+
+        return numero.toLocaleString("pt-BR", {
+
+            minimumFractionDigits: casas,
+
+            maximumFractionDigits: casas
+
+        });
+
+    }
+
+
+    // ==========================================
+    // CALCULAR
+    // ==========================================
+
+    function calcular() {
+
+        const cabecas =
+            parseFloat(document.getElementById("cabecas").value);
+
+        const peso =
+            parseFloat(document.getElementById("peso").value);
+
+        const producao =
+            parseFloat(document.getElementById("producao").value);
+
+        const erro =
+            document.getElementById("mensagemErro");
+
+
+        erro.style.display = "none";
+
+
+        // ==========================================
+        // VALIDAÇÕES
+        // ==========================================
+
+        if (!cabecas || cabecas <= 0) {
+
+            mostrarErro(
+                "Informe a quantidade de cabeças abatidas."
+            );
+
+            return;
+        }
+
+
+        if (!peso || peso <= 0) {
+
+            mostrarErro(
+                "Informe o peso médio do frango."
+            );
+
+            return;
+        }
+
+
+        if (!familiaSelecionada) {
+
+            mostrarErro(
+                "Selecione uma família."
+            );
+
+            return;
+        }
+
+
+        if (!producao || producao < 0) {
+
+            mostrarErro(
+                "Informe a produção da família."
+            );
+
+            return;
+        }
+
+
+        // ==========================================
+        // BUSCA A META
+        // ==========================================
+
+        const meta = metas[familiaSelecionada];
+
+
+        if (meta === undefined || meta <= 0) {
+
+            mostrarErro(
+                "A meta da família " +
+                familiaSelecionada +
+                " ainda não foi cadastrada."
+            );
+
+            return;
+        }
+
+
+        // ==========================================
+        // VOLUME DE ABATE
+        // ==========================================
+
+        const volumeAbate = cabecas * peso;
+
+
+        // ==========================================
+        // RENDIMENTO
+        // ==========================================
+
+        const rendimento =
+            (producao / volumeAbate) * 100;
+
+
+        // ==========================================
+        // B100
+        // ==========================================
+
+        const b100 =
+            (rendimento / meta) * 100;
+
+
+        // ==========================================
+        // MOSTRAR RESULTADOS
+        // ==========================================
+
+        document.getElementById("resultadoFamilia").innerText =
+            familiaSelecionada;
+
+
+        document.getElementById("resultadoAbate").innerText =
+            formatarNumero(volumeAbate, 0) + " kg";
+
+
+        document.getElementById("resultadoProducao").innerText =
+            formatarNumero(producao, 0) + " kg";
+
+
+        document.getElementById("resultadoRendimento").innerText =
+            formatarNumero(rendimento, 2) + "%";
+
+
+        document.getElementById("resultadoMeta").innerText =
+            formatarNumero(meta, 2) + "%";
+
+
+        document.getElementById("resultadoB100").innerText =
+            formatarNumero(b100, 2);
+
+
+        document.getElementById("resultado").style.display =
+            "block";
+
+
+        // Leva a tela até o resultado
+
+        document.getElementById("resultado").scrollIntoView({
+
+            behavior: "smooth",
+
+            block: "start"
+
+        });
+
+    }
+
+
+    // ==========================================
+    // MOSTRAR ERRO
+    // ==========================================
+
+    function mostrarErro(mensagem) {
+
+        const erro =
+            document.getElementById("mensagemErro");
+
+        erro.innerText = mensagem;
+
+        erro.style.display = "block";
+
+    }
+
+</script>
+
+</body>
+</html>
