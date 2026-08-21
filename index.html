@@ -247,6 +247,23 @@
 
         };
 
+        const rolKg = {
+
+    "Asa": 12.54,
+    "Cabeça": 1.23,
+    "Cartilagem": 10.11,
+    "CMS": 2.49,
+    "Coração": 23.62,
+    "Fígado": 2.10,
+    "Moela": 9.35,
+    "Peito": 12.43,
+    "Perna": 8.27,
+    "Pé": 16.74,
+    "Dorso": 1.61,
+    "Gordura": 0.98,
+    "Sassami": 11.52
+
+};
     </script>
 
 
@@ -623,6 +640,18 @@
             return;
         }
 
+        const rol = rolKg[familiaSelecionada];
+
+
+if (rol === undefined || rol <= 0) {
+
+    mostrarErro(
+        "O ROL/KG da família " +
+        familiaSelecionada +
+        " ainda não foi cadastrado."
+    );
+
+    return;
 
         // ==========================================
         // VOLUME DE ABATE
