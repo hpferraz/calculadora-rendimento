@@ -411,6 +411,35 @@
 
 
         /* ============================== */
+        /* DESTAQUE PERDA EM R$ */
+        /* ============================== */
+
+        .resultado-perda {
+
+            background: #8b0000;
+
+            color: #ffffff;
+
+        }
+
+
+        .resultado-perda .descricao {
+
+            color: #ffffff;
+
+        }
+
+
+        .resultado-perda .valor {
+
+            color: #ffffff;
+
+            font-size: 30px;
+
+        }
+
+
+        /* ============================== */
         /* RESPONSIVO */
         /* ============================== */
 
@@ -460,7 +489,7 @@
         </h1>
 
         <p>
-            Balanço de Massa, B100 e R$/ton
+            Balanço de Massa, B100, R$/ton e Perdas
         </p>
 
     </div>
@@ -468,7 +497,6 @@
 
     <!-- ====================================================== -->
     <!-- CONFIGURAÇÃO DAS METAS -->
-    <!-- ALTERE OS VALORES NESTE BLOCO -->
     <!-- ====================================================== -->
 
     <script>
@@ -500,13 +528,12 @@
             "Gordura": 0.60,
 
             "Sassami": 4.20
-
+            
         };
 
 
         // ======================================================
         // CONFIGURAÇÃO DO ROL/KG
-        // ALTERE OS VALORES NESTE BLOCO
         // ======================================================
 
         const rolKg = {
@@ -909,6 +936,42 @@
             </div>
 
 
+            <!-- PERDA DE PRODUTO -->
+
+            <div class="resultado-item">
+
+                <div class="descricao">
+                    Perda de Produto
+                </div>
+
+                <div
+                    class="valor"
+                    id="resultadoPerdaProduto"
+                >
+                    -
+                </div>
+
+            </div>
+
+
+            <!-- PERDA EM R$ -->
+
+            <div class="resultado-item resultado-perda">
+
+                <div class="descricao">
+                    Perda em R$
+                </div>
+
+                <div
+                    class="valor"
+                    id="resultadoPerdaRs"
+                >
+                    -
+                </div>
+
+            </div>
+
+
         </div>
 
     </div>
@@ -1181,16 +1244,6 @@
 
         // ==================================================
         // PRODUÇÃO ESPERADA PELA META
-        //
-        // Exemplo:
-        //
-        // Volume = 342.000 kg
-        // Meta = 2,60%
-        //
-        // Produção esperada:
-        //
-        // 342.000 × 0,026
-        //
         // ==================================================
 
         const producaoMeta =
@@ -1209,15 +1262,6 @@
 
         // ==================================================
         // R$/TON
-        //
-        // Fórmula:
-        //
-        // ((Produção -
-        //   (Cabeças × Peso × Meta))
-        //   × ROL/KG)
-        //   ÷ (Cabeças × Peso)
-        //   × 1000
-        //
         // ==================================================
 
         const rsTon =
@@ -1226,6 +1270,43 @@
                 /
                 volumeAbate
             ) * 1000;
+
+
+
+        // ==================================================
+        // PERDA DE PRODUTO
+        //
+        // Se rendimento estiver abaixo da meta,
+        // calcula a quantidade faltante.
+        //
+        // Se rendimento estiver igual ou acima da meta,
+        // perda = 0.
+        // ==================================================
+
+        let perdaProduto = 0;
+
+
+        if (rendimento < meta) {
+
+
+            perdaProduto =
+                (
+                    (meta - rendimento)
+                    / 100
+                ) * volumeAbate;
+
+        }
+
+
+
+        // ==================================================
+        // PERDA EM R$
+        //
+        // Perda de Produto × ROL/KG
+        // ==================================================
+
+        const perdaRs =
+            perdaProduto * rol;
 
 
 
@@ -1320,6 +1401,35 @@
             "R$ " +
             formatarNumero(
                 rsTon,
+                2
+            );
+
+
+
+        // ==================================================
+        // MOSTRAR PERDA DE PRODUTO
+        // ==================================================
+
+        document.getElementById(
+            "resultadoPerdaProduto"
+        ).innerText =
+            formatarNumero(
+                perdaProduto,
+                2
+            ) + " kg";
+
+
+
+        // ==================================================
+        // MOSTRAR PERDA EM R$
+        // ==================================================
+
+        document.getElementById(
+            "resultadoPerdaRs"
+        ).innerText =
+            "R$ " +
+            formatarNumero(
+                perdaRs,
                 2
             );
 
