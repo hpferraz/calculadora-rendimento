@@ -1,1495 +1,1469 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
-
-    <meta charset="UTF-8">
-
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Calculadora de Rendimento</title>
-
-
-    <style>
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: Arial, Helvetica, sans-serif;
-        }
-
-
-        body {
-
-            background: #f2f4f7;
-
-            min-height: 100vh;
-
-            padding: 30px 15px;
-
-        }
-
-
-        .container {
-
-            max-width: 850px;
-
-            margin: auto;
-
-        }
-
-
-        /* ============================== */
-        /* CABEÇALHO */
-        /* ============================== */
-
-        .cabecalho {
-
-            background: #ffffff;
-
-            border-radius: 15px;
-
-            padding: 25px;
-
-            margin-bottom: 20px;
-
-            text-align: center;
-
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-
-        }
-
-
-        .cabecalho h1 {
-
-            font-size: 28px;
-
-            color: #333333;
-
-            margin-bottom: 8px;
-
-        }
-
-
-        .cabecalho p {
-
-            color: #777777;
-
-            font-size: 15px;
-
-        }
-
-
-        /* ============================== */
-        /* CARDS */
-        /* ============================== */
-
-        .card {
-
-            background: #ffffff;
-
-            border-radius: 15px;
-
-            padding: 25px;
-
-            margin-bottom: 20px;
-
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-
-        }
-
-
-        .titulo {
-
-            font-size: 19px;
-
-            font-weight: bold;
-
-            color: #333333;
-
-            margin-bottom: 20px;
-
-            border-left: 5px solid #e30613;
-
-            padding-left: 10px;
-
-        }
-
-
-        /* ============================== */
-        /* CAMPOS */
-        /* ============================== */
-
-        .campo {
-
-            margin-bottom: 20px;
-
-        }
-
-
-        .campo label {
-
-            display: block;
-
-            font-weight: bold;
-
-            color: #444444;
-
-            margin-bottom: 8px;
-
-        }
-
-
-        .campo input {
-
-            width: 100%;
-
-            padding: 14px;
-
-            border: 1px solid #cccccc;
-
-            border-radius: 8px;
-
-            font-size: 17px;
-
-            outline: none;
-
-        }
-
-
-        .campo input:focus {
-
-            border-color: #e30613;
-
-            box-shadow: 0 0 0 2px rgba(227,6,19,0.1);
-
-        }
-
-
-        /* ============================== */
-        /* FAMÍLIAS */
-        /* ============================== */
-
-        .familias {
-
-            display: grid;
-
-            grid-template-columns: repeat(4, 1fr);
-
-            gap: 10px;
-
-        }
-
-
-        .familia {
-
-            padding: 14px 8px;
-
-            border: 2px solid #dddddd;
-
-            background: #ffffff;
-
-            border-radius: 9px;
-
-            cursor: pointer;
-
-            font-weight: bold;
-
-            color: #444444;
-
-            transition: 0.2s;
-
-        }
-
-
-        .familia:hover {
-
-            border-color: #e30613;
-
-            color: #e30613;
-
-        }
-
-
-        .familia.selecionada {
-
-            background: #e30613;
-
-            border-color: #e30613;
-
-            color: #ffffff;
-
-        }
-
-
-        .familia-escolhida {
-
-            margin-top: 15px;
-
-            text-align: center;
-
-            font-weight: bold;
-
-            color: #555555;
-
-        }
-
-
-        /* ============================== */
-        /* BOTÃO CALCULAR */
-        /* ============================== */
-
-        .botao-calcular {
-
-            width: 100%;
-
-            padding: 17px;
-
-            background: #e30613;
-
-            border: none;
-
-            border-radius: 9px;
-
-            color: white;
-
-            font-size: 18px;
-
-            font-weight: bold;
-
-            cursor: pointer;
-
-            transition: 0.2s;
-
-        }
-
-
-        .botao-calcular:hover {
-
-            background: #c90010;
-
-        }
-
-
-        /* ============================== */
-        /* ERRO */
-        /* ============================== */
-
-        .erro {
-
-            display: none;
-
-            background: #ffe5e5;
-
-            color: #b00000;
-
-            padding: 12px;
-
-            border-radius: 8px;
-
-            margin-bottom: 15px;
-
-            font-weight: bold;
-
-        }
-
-
-        /* ============================== */
-        /* RESULTADO */
-        /* ============================== */
-
-        .resultado {
-
-            display: none;
-
-        }
-
-
-        .resultado-grid {
-
-            display: grid;
-
-            grid-template-columns: repeat(2, 1fr);
-
-            gap: 15px;
-
-        }
-
-
-        .resultado-item {
-
-            background: #f5f6f8;
-
-            border-radius: 10px;
-
-            padding: 20px;
-
-            text-align: center;
-
-        }
-
-
-        .resultado-item .descricao {
-
-            font-size: 14px;
-
-            color: #777777;
-
-            margin-bottom: 8px;
-
-        }
-
-
-        .resultado-item .valor {
-
-            font-size: 26px;
-
-            font-weight: bold;
-
-            color: #333333;
-
-        }
-
-
-        /* ============================== */
-        /* DESTAQUE B100 */
-        /* ============================== */
-
-        .resultado-destaque {
-
-            background: #333333;
-
-            color: #ffffff;
-
-        }
-
-
-        .resultado-destaque .descricao {
-
-            color: #dddddd;
-
-        }
-
-
-        .resultado-destaque .valor {
-
-            color: #ffffff;
-
-            font-size: 32px;
-
-        }
-
-
-        /* ============================== */
-        /* DESTAQUE R$/TON */
-        /* ============================== */
-
-        .resultado-rs {
-
-            background: #e30613;
-
-            color: #ffffff;
-
-        }
-
-
-        .resultado-rs .descricao {
-
-            color: #ffffff;
-
-        }
-
-
-        .resultado-rs .valor {
-
-            color: #ffffff;
-
-            font-size: 30px;
-
-        }
-
-
-        /* ============================== */
-        /* DESTAQUE PERDA EM R$ */
-        /* ============================== */
-
-        .resultado-perda {
-
-            background: #8b0000;
-
-            color: #ffffff;
-
-        }
-
-
-        .resultado-perda .descricao {
-
-            color: #ffffff;
-
-        }
-
-
-        .resultado-perda .valor {
-
-            color: #ffffff;
-
-            font-size: 30px;
-
-        }
-
-
-        /* ============================== */
-        /* RESPONSIVO */
-        /* ============================== */
-
-        @media (max-width: 650px) {
-
-            .familias {
-
-                grid-template-columns: repeat(2, 1fr);
-
-            }
-
-
-            .resultado-grid {
-
-                grid-template-columns: 1fr;
-
-            }
-
-
-            .cabecalho h1 {
-
-                font-size: 23px;
-
-            }
-
-        }
-
-    </style>
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora de Rendimento</title>
+
+<!-- Leitor de Excel (.xlsb/.xlsx) -->
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:Arial,Helvetica,sans-serif}
+
+body{
+    background:#f2f4f7;
+    min-height:100vh;
+    padding:20px 12px 40px;
+    color:#333;
+}
+
+.container{max-width:1100px;margin:auto}
+
+.cabecalho{
+    background:#fff;
+    border-radius:15px;
+    padding:22px;
+    margin-bottom:18px;
+    text-align:center;
+    box-shadow:0 4px 15px rgba(0,0,0,.08);
+}
+
+.cabecalho h1{font-size:28px;color:#333;margin-bottom:7px}
+.cabecalho p{color:#777;font-size:14px}
+
+.view{display:none}
+.view.ativa{display:block}
+
+.card{
+    background:#fff;
+    border-radius:15px;
+    padding:22px;
+    margin-bottom:18px;
+    box-shadow:0 4px 15px rgba(0,0,0,.08);
+}
+
+.titulo{
+    font-size:19px;
+    font-weight:bold;
+    color:#333;
+    margin-bottom:18px;
+    border-left:5px solid #e30613;
+    padding-left:10px;
+}
+
+.menu-inicial{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:18px;
+}
+
+.menu-btn{
+    border:0;
+    border-radius:14px;
+    padding:28px 18px;
+    background:#e30613;
+    color:#fff;
+    cursor:pointer;
+    font-size:19px;
+    font-weight:bold;
+    box-shadow:0 5px 12px rgba(227,6,19,.20);
+    transition:.2s;
+}
+.menu-btn:hover{background:#c90010;transform:translateY(-2px)}
+.menu-btn.secundario{background:#ff5300}
+.menu-btn.secundario:hover{background:#df4600}
+
+.botao-voltar{
+    border:1px solid #ddd;
+    background:#fff;
+    color:#555;
+    border-radius:8px;
+    padding:9px 14px;
+    font-weight:bold;
+    cursor:pointer;
+    margin-bottom:15px;
+}
+.botao-voltar:hover{border-color:#e30613;color:#e30613}
+
+.campo{margin-bottom:16px}
+.campo label{
+    display:block;
+    font-weight:bold;
+    color:#444;
+    margin-bottom:7px;
+}
+.campo input,.campo select{
+    width:100%;
+    padding:12px;
+    border:1px solid #ccc;
+    border-radius:8px;
+    font-size:16px;
+    outline:none;
+    background:#fff;
+}
+.campo input:focus,.campo select:focus{
+    border-color:#e30613;
+    box-shadow:0 0 0 2px rgba(227,6,19,.1);
+}
+
+.filtros-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    gap:15px;
+}
+
+.familias{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:9px;
+}
+.familia{
+    padding:12px 7px;
+    border:2px solid #ddd;
+    background:#fff;
+    border-radius:9px;
+    cursor:pointer;
+    font-weight:bold;
+    color:#444;
+    transition:.2s;
+}
+.familia:hover{border-color:#e30613;color:#e30613}
+.familia.selecionada{background:#e30613;border-color:#e30613;color:#fff}
+
+.familia-escolhida{
+    margin-top:12px;
+    text-align:center;
+    font-weight:bold;
+    color:#555;
+}
+
+.tipo-indicador{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:10px;
+}
+.indicador-btn{
+    padding:13px;
+    border:2px solid #ddd;
+    background:#fff;
+    color:#444;
+    border-radius:9px;
+    cursor:pointer;
+    font-weight:bold;
+    font-size:15px;
+}
+.indicador-btn:hover{border-color:#ff5300;color:#ff5300}
+.indicador-btn.ativo{
+    background:#ff5300;
+    border-color:#ff5300;
+    color:#fff;
+}
+
+.periodos{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+}
+.periodo-btn{
+    border:2px solid #ddd;
+    background:#fff;
+    color:#444;
+    border-radius:8px;
+    padding:10px 13px;
+    cursor:pointer;
+    font-weight:bold;
+}
+.periodo-btn:hover{border-color:#e30613;color:#e30613}
+.periodo-btn.ativo{
+    background:#e30613;
+    border-color:#e30613;
+    color:#fff;
+}
+
+.periodo-personalizado{
+    display:none;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+    margin-top:12px;
+}
+.periodo-personalizado.mostrar{display:grid}
+
+.status{
+    display:none;
+    padding:12px;
+    border-radius:8px;
+    margin-bottom:14px;
+    font-weight:bold;
+}
+.status.mostrar{display:block}
+.status.carregando{background:#fff4df;color:#9a5b00}
+.status.sucesso{background:#e9f8ee;color:#176b35}
+.status.erro{background:#ffe5e5;color:#b00000}
+
+.info-precos{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:10px;
+    margin-bottom:15px;
+}
+.info-item{
+    background:#f5f6f8;
+    border-radius:10px;
+    padding:12px;
+    text-align:center;
+}
+.info-item .label{font-size:12px;color:#777;margin-bottom:4px}
+.info-item .valor{font-size:16px;font-weight:bold;color:#333}
+
+.tabela-wrapper{
+    width:100%;
+    max-height:65vh;
+    overflow:auto;
+    border:1px solid #ddd;
+    border-radius:10px;
+    background:#fff;
+    -webkit-overflow-scrolling:touch;
+}
+
+.tabela-precos{
+    border-collapse:separate;
+    border-spacing:0;
+    width:max-content;
+    min-width:100%;
+    font-size:13px;
+}
+
+.tabela-precos th,
+.tabela-precos td{
+    padding:10px 12px;
+    border-right:1px solid #e5e5e5;
+    border-bottom:1px solid #e5e5e5;
+    white-space:nowrap;
+}
+
+.tabela-precos thead th{
+    position:sticky;
+    top:0;
+    z-index:5;
+    background:#e30613;
+    color:#fff;
+    font-weight:bold;
+    text-align:center;
+}
+
+.tabela-precos thead th.produto-col{
+    left:0;
+    z-index:7;
+    text-align:left;
+    min-width:330px;
+}
+
+.tabela-precos td.produto{
+    position:sticky;
+    left:0;
+    z-index:3;
+    background:#fff;
+    min-width:330px;
+    max-width:500px;
+    white-space:normal;
+    font-weight:600;
+}
+
+.tabela-precos tr.mercado td{
+    background:#f5f6f8;
+    color:#e30613;
+    font-weight:bold;
+    padding-top:8px;
+    padding-bottom:8px;
+}
+
+.tabela-precos tr.mercado td.produto{
+    z-index:4;
+}
+
+.tabela-precos tr.familia-resumo td{
+    background:#333;
+    color:#fff;
+    font-weight:bold;
+}
+
+.tabela-precos tr.familia-resumo td.produto{
+    background:#333;
+    color:#fff;
+}
+
+.tabela-precos td.valor{text-align:right}
+.tabela-precos td.vazio{color:#aaa;text-align:center}
+
+.tabela-precos tr.produto-linha:nth-child(even) td{background:#fafafa}
+.tabela-precos tr.produto-linha:nth-child(even) td.produto{background:#fafafa}
+
+.nenhum{
+    text-align:center;
+    padding:25px;
+    color:#777;
+    font-weight:bold;
+}
+
+.botao-calcular{
+    width:100%;
+    padding:16px;
+    background:#e30613;
+    border:none;
+    border-radius:9px;
+    color:#fff;
+    font-size:18px;
+    font-weight:bold;
+    cursor:pointer;
+}
+.botao-calcular:hover{background:#c90010}
+
+.erro{
+    display:none;
+    background:#ffe5e5;
+    color:#b00000;
+    padding:12px;
+    border-radius:8px;
+    margin-bottom:15px;
+    font-weight:bold;
+}
+
+.resultado{display:none}
+.resultado-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:15px;
+}
+.resultado-item{
+    background:#f5f6f8;
+    border-radius:10px;
+    padding:20px;
+    text-align:center;
+}
+.resultado-item .descricao{font-size:14px;color:#777;margin-bottom:8px}
+.resultado-item .valor{font-size:26px;font-weight:bold;color:#333}
+.resultado-destaque{background:#333;color:#fff}
+.resultado-destaque .descricao{color:#ddd}
+.resultado-destaque .valor{color:#fff;font-size:32px}
+.resultado-rs{background:#e30613;color:#fff}
+.resultado-rs .descricao,.resultado-rs .valor{color:#fff}
+.resultado-rs .valor{font-size:30px}
+.resultado-perda{background:#8b0000;color:#fff}
+.resultado-perda .descricao,.resultado-perda .valor{color:#fff}
+.resultado-perda .valor{font-size:30px}
+
+@media(max-width:800px){
+    .filtros-grid{grid-template-columns:1fr}
+    .familias{grid-template-columns:repeat(3,1fr)}
+}
+
+@media(max-width:650px){
+    body{padding:12px 8px 30px}
+    .cabecalho{padding:18px}
+    .cabecalho h1{font-size:23px}
+    .menu-inicial{grid-template-columns:1fr}
+    .card{padding:16px}
+    .familias{grid-template-columns:repeat(2,1fr)}
+    .resultado-grid{grid-template-columns:1fr}
+    .info-precos{grid-template-columns:1fr 1fr}
+    .periodo-personalizado.mostrar{grid-template-columns:1fr}
+    .tabela-precos{font-size:12px}
+    .tabela-precos th,.tabela-precos td{padding:9px 10px}
+    .tabela-precos thead th.produto-col,
+    .tabela-precos td.produto{
+        min-width:245px;
+        max-width:300px;
+    }
+}
+</style>
 </head>
 
-
 <body>
-
-
 <div class="container">
 
-
-    <!-- ============================== -->
-    <!-- CABEÇALHO -->
-    <!-- ============================== -->
-
     <div class="cabecalho">
-
-        <h1>
-            Calculadora de Rendimento
-        </h1>
-
-        <p>
-            Balanço de Massa, B100, R$/ton e Perdas
-        </p>
-
+        <h1>Calculadora de Rendimento</h1>
+        <p>Balanço de Massa, B100, R$/ton, Perdas e ROL/kg Produto</p>
     </div>
 
+    <!-- ================= MENU INICIAL ================= -->
+    <section id="telaInicial" class="view ativa">
+        <div class="card">
+            <div class="titulo">Selecione uma opção</div>
 
-    <!-- ====================================================== -->
-    <!-- CONFIGURAÇÃO DAS METAS -->
-    <!-- ====================================================== -->
+            <div class="menu-inicial">
+                <button class="menu-btn" onclick="mostrarTela('telaCalculadora')">
+                    🧮<br><br>CALCULADORA
+                </button>
 
-    <script>
+                <button class="menu-btn secundario" onclick="mostrarTela('telaPrecos')">
+                    💰<br><br>ROL/kg PRODUTO
+                </button>
+            </div>
+        </div>
+    </section>
 
-        const metas = {
+    <!-- ================= CALCULADORA ================= -->
+    <section id="telaCalculadora" class="view">
 
-            "Asa": 7.50,
+        <button class="botao-voltar" onclick="mostrarTela('telaInicial')">← Voltar</button>
 
-            "Cabeça": 2.00,
+        <div class="card">
+            <div class="titulo">Dados do Abate</div>
 
-            "Cartilagem": 0.20,
+            <div class="campo">
+                <label for="cabecas">Quantidade de cabeças abatidas</label>
+                <input type="number" id="cabecas" placeholder="Ex.: 120000" min="0">
+            </div>
 
-            "CMS": 10.00,
-
-            "Coração": 0.40,
-
-            "Fígado": 1.90,
-
-            "Moela": 1.10,
-
-            "Peito": 20.60,
-
-            "Perna": 23.10,
-
-            "Pé": 3.30,
-
-            "Dorso": 2.10,
-
-            "Gordura": 1.30,
-
-            "Sassami": 4.30
-            
-        };
-
-
-        // ======================================================
-        // CONFIGURAÇÃO DO ROL/KG
-        // ======================================================
-
-        const rolKg = {
-
-            "Asa": 13.62,
-
-            "Cabeça": 1.29,
-
-            "Cartilagem": 12.56,
-
-            "CMS": 2.47,
-
-            "Coração": 26.17,
-
-            "Fígado": 2.61,
-
-            "Moela": 8.91,
-
-            "Peito": 13.34,
-
-            "Perna": 11.16,
-
-            "Pé": 13.76,
-
-            "Dorso": 2.24,
-
-            "Gordura": 2.03,
-
-            "Sassami": 12.10
-
-        };
-
-    </script>
-
-
-    <!-- ============================== -->
-    <!-- DADOS DO ABATE -->
-    <!-- ============================== -->
-
-    <div class="card">
-
-        <div class="titulo">
-            Dados do Abate
+            <div class="campo">
+                <label for="peso">Peso médio do frango (kg)</label>
+                <input type="number" id="peso" placeholder="Ex.: 2,850" min="0" step="0.001">
+            </div>
         </div>
 
+        <div class="card">
+            <div class="titulo">Selecione a Família</div>
 
-        <div class="campo">
+            <div class="familias">
+                <button class="familia" onclick="selecionarFamilia('Asa',this)">Asa</button>
+                <button class="familia" onclick="selecionarFamilia('Cabeça',this)">Cabeça</button>
+                <button class="familia" onclick="selecionarFamilia('Cartilagem',this)">Cartilagem</button>
+                <button class="familia" onclick="selecionarFamilia('CMS',this)">CMS</button>
+                <button class="familia" onclick="selecionarFamilia('Coração',this)">Coração</button>
+                <button class="familia" onclick="selecionarFamilia('Fígado',this)">Fígado</button>
+                <button class="familia" onclick="selecionarFamilia('Moela',this)">Moela</button>
+                <button class="familia" onclick="selecionarFamilia('Peito',this)">Peito</button>
+                <button class="familia" onclick="selecionarFamilia('Perna',this)">Perna</button>
+                <button class="familia" onclick="selecionarFamilia('Pé',this)">Pé</button>
+                <button class="familia" onclick="selecionarFamilia('Dorso',this)">Dorso</button>
+                <button class="familia" onclick="selecionarFamilia('Gordura',this)">Gordura</button>
+                <button class="familia" onclick="selecionarFamilia('Sassami',this)">Sassami</button>
+            </div>
 
-            <label for="cabecas">
-                Quantidade de cabeças abatidas
-            </label>
-
-            <input
-                type="number"
-                id="cabecas"
-                placeholder="Ex.: 120000"
-                min="0"
-            >
-
+            <div class="familia-escolhida" id="familiaEscolhida">
+                Nenhuma família selecionada
+            </div>
         </div>
 
+        <div class="card">
+            <div class="titulo">Produção</div>
 
-        <div class="campo">
+            <div class="campo">
+                <label for="producao">Produção da família (kg)</label>
+                <input type="number" id="producao" placeholder="Ex.: 8500" min="0" step="0.001">
+            </div>
 
-            <label for="peso">
-                Peso médio do frango (kg)
-            </label>
+            <div id="mensagemErro" class="erro"></div>
 
-            <input
-                type="number"
-                id="peso"
-                placeholder="Ex.: 2,850"
-                min="0"
-                step="0.001"
-            >
-
+            <button class="botao-calcular" onclick="calcular()">CALCULAR</button>
         </div>
 
-    </div>
-
-
-    <!-- ============================== -->
-    <!-- FAMÍLIA -->
-    <!-- ============================== -->
-
-    <div class="card">
-
-        <div class="titulo">
-            Selecione a Família
-        </div>
-
-
-        <div class="familias">
-
-
-            <button
-                class="familia"
-                onclick="selecionarFamilia('Asa', this)"
-            >
-                Asa
-            </button>
-
-
-            <button
-                class="familia"
-                onclick="selecionarFamilia('Cabeça', this)"
-            >
-                Cabeça
-            </button>
-
-
-            <button
-                class="familia"
-                onclick="selecionarFamilia('Cartilagem', this)"
-            >
-                Cartilagem
-            </button>
-
-
-            <button
-                class="familia"
-                onclick="selecionarFamilia('CMS', this)"
-            >
-                CMS
-            </button>
-
-
-            <button
-                class="familia"
-                onclick="selecionarFamilia('Coração', this)"
-            >
-                Coração
-            </button>
-
-
-            <button
-                class="familia"
-                onclick="selecionarFamilia('Fígado', this)"
-            >
-                Fígado
-            </button>
-
-
-            <button
-                class="familia"
-                onclick="selecionarFamilia('Moela', this)"
-            >
-                Moela
-            </button>
-
-
-            <button
-                class="familia"
-                onclick="selecionarFamilia('Peito', this)"
-            >
-                Peito
-            </button>
-
-
-            <button
-                class="familia"
-                onclick="selecionarFamilia('Perna', this)"
-            >
-                Perna
-            </button>
-
-
-            <button
-                class="familia"
-                onclick="selecionarFamilia('Pé', this)"
-            >
-                Pé
-            </button>
-
-
-            <button
-                class="familia"
-                onclick="selecionarFamilia('Dorso', this)"
-            >
-                Dorso
-            </button>
-
-
-            <button
-                class="familia"
-                onclick="selecionarFamilia('Gordura', this)"
-            >
-                Gordura
-            </button>
-
-
-            <button
-                class="familia"
-                onclick="selecionarFamilia('Sassami', this)"
-            >
-                Sassami
-            </button>
-
-
-        </div>
-
-
-        <div
-            class="familia-escolhida"
-            id="familiaEscolhida"
-        >
-
-            Nenhuma família selecionada
-
-        </div>
-
-    </div>
-
-
-    <!-- ============================== -->
-    <!-- PRODUÇÃO -->
-    <!-- ============================== -->
-
-    <div class="card">
-
-        <div class="titulo">
-            Produção
-        </div>
-
-
-        <div class="campo">
-
-            <label for="producao">
-                Produção da família (kg)
-            </label>
-
-
-            <input
-                type="number"
-                id="producao"
-                placeholder="Ex.: 8500"
-                min="0"
-                step="0.001"
-            >
-
-        </div>
-
-
-        <div
-            id="mensagemErro"
-            class="erro"
-        ></div>
-
-
-        <button
-            class="botao-calcular"
-            onclick="calcular()"
-        >
-            CALCULAR
-        </button>
-
-    </div>
-
-
-    <!-- ============================== -->
-    <!-- RESULTADO -->
-    <!-- ============================== -->
-
-    <div
-        class="card resultado"
-        id="resultado"
-    >
-
-        <div class="titulo">
-            Resultado
-        </div>
-
-
-        <div class="resultado-grid">
-
-
-            <!-- FAMÍLIA -->
-
-            <div class="resultado-item">
-
-                <div class="descricao">
-                    Família
+        <div class="card resultado" id="resultado">
+            <div class="titulo">Resultado</div>
+
+            <div class="resultado-grid">
+                <div class="resultado-item">
+                    <div class="descricao">Família</div>
+                    <div class="valor" id="resultadoFamilia">-</div>
                 </div>
 
-                <div
-                    class="valor"
-                    id="resultadoFamilia"
-                >
-                    -
+                <div class="resultado-item">
+                    <div class="descricao">Volume de Abate</div>
+                    <div class="valor" id="resultadoAbate">-</div>
+                </div>
+
+                <div class="resultado-item">
+                    <div class="descricao">Produção</div>
+                    <div class="valor" id="resultadoProducao">-</div>
+                </div>
+
+                <div class="resultado-item">
+                    <div class="descricao">Rendimento / Balanço de Massa</div>
+                    <div class="valor" id="resultadoRendimento">-</div>
+                </div>
+
+                <div class="resultado-item">
+                    <div class="descricao">Meta</div>
+                    <div class="valor" id="resultadoMeta">-</div>
+                </div>
+
+                <div class="resultado-item resultado-destaque">
+                    <div class="descricao">B100</div>
+                    <div class="valor" id="resultadoB100">-</div>
+                </div>
+
+                <div class="resultado-item resultado-rs">
+                    <div class="descricao">R$/ton</div>
+                    <div class="valor" id="resultadoRsTon">-</div>
+                </div>
+
+                <div class="resultado-item">
+                    <div class="descricao">Perda de Produto</div>
+                    <div class="valor" id="resultadoPerdaProduto">-</div>
+                </div>
+
+                <div class="resultado-item resultado-perda">
+                    <div class="descricao">Perda em R$</div>
+                    <div class="valor" id="resultadoPerdaRs">-</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= ROL / MARGEM ================= -->
+    <section id="telaPrecos" class="view">
+
+        <button class="botao-voltar" onclick="mostrarTela('telaInicial')">← Voltar</button>
+
+        <div class="card">
+            <div class="titulo">ROL/kg Produto</div>
+
+            <div id="statusExcel" class="status"></div>
+
+            <div class="tipo-indicador">
+                <button id="btnROL" class="indicador-btn ativo" onclick="selecionarIndicador('rol')">
+                    ROL/kg
+                </button>
+                <button id="btnMargem" class="indicador-btn" onclick="selecionarIndicador('margem')">
+                    Margem (R$/kg)
+                </button>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="titulo">Selecione a Família</div>
+
+            <div class="familias" id="familiasPrecos"></div>
+
+            <div class="familia-escolhida" id="familiaPrecoEscolhida">
+                Nenhuma família selecionada
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="titulo">Filtros</div>
+
+            <div class="filtros-grid">
+
+                <div class="campo">
+                    <label for="mercadoSelect">Mercado</label>
+                    <select id="mercadoSelect" onchange="renderTabelaPrecos()">
+                        <option value="">Todos os mercados</option>
+                    </select>
+                </div>
+
+                <div class="campo">
+                    <label for="periodoSelect">Período</label>
+                    <select id="periodoSelect" onchange="alterarPeriodoSelect()">
+                        <option value="mes">Mês específico</option>
+                        <option value="trimestre">Último trimestre</option>
+                        <option value="3">Últimos 3 meses</option>
+                        <option value="6">Últimos 6 meses</option>
+                        <option value="12">Últimos 12 meses</option>
+                        <option value="personalizado">Personalizado</option>
+                    </select>
+                </div>
+
+                <div class="campo">
+                    <label for="mesSelect">Mês</label>
+                    <select id="mesSelect" onchange="renderTabelaPrecos()"></select>
                 </div>
 
             </div>
 
-
-            <!-- VOLUME DE ABATE -->
-
-            <div class="resultado-item">
-
-                <div class="descricao">
-                    Volume de Abate
+            <div id="periodoPersonalizado" class="periodo-personalizado">
+                <div class="campo">
+                    <label for="mesInicio">De</label>
+                    <select id="mesInicio" onchange="renderTabelaPrecos()"></select>
                 </div>
 
-                <div
-                    class="valor"
-                    id="resultadoAbate"
-                >
-                    -
+                <div class="campo">
+                    <label for="mesFim">Até</label>
+                    <select id="mesFim" onchange="renderTabelaPrecos()"></select>
                 </div>
-
             </div>
-
-
-            <!-- PRODUÇÃO -->
-
-            <div class="resultado-item">
-
-                <div class="descricao">
-                    Produção
-                </div>
-
-                <div
-                    class="valor"
-                    id="resultadoProducao"
-                >
-                    -
-                </div>
-
-            </div>
-
-
-            <!-- RENDIMENTO -->
-
-            <div class="resultado-item">
-
-                <div class="descricao">
-                    Rendimento / Balanço de Massa
-                </div>
-
-                <div
-                    class="valor"
-                    id="resultadoRendimento"
-                >
-                    -
-                </div>
-
-            </div>
-
-
-            <!-- META -->
-
-            <div class="resultado-item">
-
-                <div class="descricao">
-                    Meta
-                </div>
-
-                <div
-                    class="valor"
-                    id="resultadoMeta"
-                >
-                    -
-                </div>
-
-            </div>
-
-
-            <!-- B100 -->
-
-            <div class="resultado-item resultado-destaque">
-
-                <div class="descricao">
-                    B100
-                </div>
-
-                <div
-                    class="valor"
-                    id="resultadoB100"
-                >
-                    -
-                </div>
-
-            </div>
-
-
-            <!-- R$/TON -->
-
-            <div class="resultado-item resultado-rs">
-
-                <div class="descricao">
-                    R$/ton
-                </div>
-
-                <div
-                    class="valor"
-                    id="resultadoRsTon"
-                >
-                    -
-                </div>
-
-            </div>
-
-
-            <!-- PERDA DE PRODUTO -->
-
-            <div class="resultado-item">
-
-                <div class="descricao">
-                    Perda de Produto
-                </div>
-
-                <div
-                    class="valor"
-                    id="resultadoPerdaProduto"
-                >
-                    -
-                </div>
-
-            </div>
-
-
-            <!-- PERDA EM R$ -->
-
-            <div class="resultado-item resultado-perda">
-
-                <div class="descricao">
-                    Perda em R$
-                </div>
-
-                <div
-                    class="valor"
-                    id="resultadoPerdaRs"
-                >
-                    -
-                </div>
-
-            </div>
-
-
         </div>
 
-    </div>
+        <div class="card">
+            <div class="info-precos">
+                <div class="info-item">
+                    <div class="label">Indicador</div>
+                    <div class="valor" id="infoIndicador">ROL/kg</div>
+                </div>
 
+                <div class="info-item">
+                    <div class="label">Último mês disponível</div>
+                    <div class="valor" id="infoUltimoMes">-</div>
+                </div>
 
+                <div class="info-item">
+                    <div class="label">Produtos exibidos</div>
+                    <div class="valor" id="infoProdutos">0</div>
+                </div>
+            </div>
+
+            <div class="tabela-wrapper">
+                <table class="tabela-precos" id="tabelaPrecos">
+                    <thead></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
 </div>
 
-
 <script>
+/* =========================================================
+   CONFIGURAÇÃO DA CALCULADORA
+   ========================================================= */
 
+const metas = {
+    "Asa": 7.50,
+    "Cabeça": 2.00,
+    "Cartilagem": 0.20,
+    "CMS": 10.00,
+    "Coração": 0.40,
+    "Fígado": 1.90,
+    "Moela": 1.10,
+    "Peito": 20.60,
+    "Perna": 23.10,
+    "Pé": 3.30,
+    "Dorso": 2.10,
+    "Gordura": 1.30,
+    "Sassami": 4.30
+};
 
-    // ======================================================
-    // VARIÁVEL DA FAMÍLIA SELECIONADA
-    // ======================================================
+const rolKg = {
+    "Asa": 13.62,
+    "Cabeça": 1.29,
+    "Cartilagem": 12.56,
+    "CMS": 2.47,
+    "Coração": 26.17,
+    "Fígado": 2.61,
+    "Moela": 8.91,
+    "Peito": 13.34,
+    "Perna": 11.16,
+    "Pé": 13.76,
+    "Dorso": 2.24,
+    "Gordura": 2.03,
+    "Sassami": 12.10
+};
 
-    let familiaSelecionada = null;
+let familiaSelecionada = null;
 
+function mostrarTela(id){
+    document.querySelectorAll(".view").forEach(v => v.classList.remove("ativa"));
+    document.getElementById(id).classList.add("ativa");
+    window.scrollTo({top:0,behavior:"smooth"});
 
+    if(id === "telaPrecos" && !excelCarregado){
+        carregarPrecos();
+    }
+}
 
-    // ======================================================
-    // SELECIONAR FAMÍLIA
-    // ======================================================
+function selecionarFamilia(familia, botao){
+    familiaSelecionada = familia;
 
-    function selecionarFamilia(familia, botao) {
+    document.querySelectorAll("#telaCalculadora .familia").forEach(btn =>
+        btn.classList.remove("selecionada")
+    );
 
+    botao.classList.add("selecionada");
 
-        familiaSelecionada = familia;
+    document.getElementById("familiaEscolhida").innerText =
+        "Família selecionada: " + familia;
+}
 
+function formatarNumero(numero, casas){
+    return numero.toLocaleString("pt-BR",{
+        minimumFractionDigits:casas,
+        maximumFractionDigits:casas
+    });
+}
 
-        const botoes =
-            document.querySelectorAll(".familia");
+function calcular(){
 
+    const cabecas = parseFloat(document.getElementById("cabecas").value);
+    const peso = parseFloat(document.getElementById("peso").value);
+    const producao = parseFloat(document.getElementById("producao").value);
+    const erro = document.getElementById("mensagemErro");
 
-        botoes.forEach(function(btn) {
+    erro.style.display="none";
 
-            btn.classList.remove("selecionada");
-
-        });
-
-
-        botao.classList.add("selecionada");
-
-
-        document.getElementById(
-            "familiaEscolhida"
-        ).innerText =
-            "Família selecionada: " + familia;
-
+    if(!cabecas || cabecas <= 0){
+        mostrarErro("Informe a quantidade de cabeças abatidas.");
+        return;
     }
 
+    if(!peso || peso <= 0){
+        mostrarErro("Informe o peso médio do frango.");
+        return;
+    }
+
+    if(!familiaSelecionada){
+        mostrarErro("Selecione uma família.");
+        return;
+    }
+
+    if(!producao || producao < 0){
+        mostrarErro("Informe a produção da família.");
+        return;
+    }
+
+    const meta = metas[familiaSelecionada];
+
+    if(meta === undefined || meta <= 0){
+        mostrarErro("A meta da família " + familiaSelecionada + " ainda não foi cadastrada.");
+        return;
+    }
+
+    const rol = rolKg[familiaSelecionada];
+
+    if(rol === undefined || rol <= 0){
+        mostrarErro("O ROL/KG da família " + familiaSelecionada + " ainda não foi cadastrado.");
+        return;
+    }
+
+    const volumeAbate = cabecas * peso;
+    const rendimento = (producao / volumeAbate) * 100;
+    const b100 = (rendimento / meta) * 100;
+    const producaoMeta = volumeAbate * (meta / 100);
+    const diferencaProducao = producao - producaoMeta;
+
+    const rsTon = ((diferencaProducao * rol) / volumeAbate) * 1000;
+
+    let perdaProduto = 0;
+
+    if(rendimento < meta){
+        perdaProduto = ((meta - rendimento) / 100) * volumeAbate;
+    }
+
+    const perdaRs = perdaProduto * rol;
+
+    document.getElementById("resultadoFamilia").innerText = familiaSelecionada;
+    document.getElementById("resultadoAbate").innerText =
+        formatarNumero(volumeAbate,2) + " kg";
+    document.getElementById("resultadoProducao").innerText =
+        formatarNumero(producao,2) + " kg";
+    document.getElementById("resultadoRendimento").innerText =
+        formatarNumero(rendimento,2) + "%";
+    document.getElementById("resultadoMeta").innerText =
+        formatarNumero(meta,2) + "%";
+    document.getElementById("resultadoB100").innerText =
+        formatarNumero(b100,2);
+    document.getElementById("resultadoRsTon").innerText =
+        "R$ " + formatarNumero(rsTon,2);
+    document.getElementById("resultadoPerdaProduto").innerText =
+        formatarNumero(perdaProduto,0) + " kg";
+    document.getElementById("resultadoPerdaRs").innerText =
+        "R$ " + formatarNumero(perdaRs,0);
+
+    document.getElementById("resultado").style.display="block";
+
+    document.getElementById("resultado").scrollIntoView({
+        behavior:"smooth",
+        block:"start"
+    });
+}
+
+function mostrarErro(mensagem){
+    const erro=document.getElementById("mensagemErro");
+    erro.innerText=mensagem;
+    erro.style.display="block";
+}
 
 
-    // ======================================================
-    // FORMATAÇÃO DE NÚMEROS
-    // ======================================================
+/* =========================================================
+   LEITOR DA ABA "PREÇOS"
 
-    function formatarNumero(numero, casas) {
+   O arquivo utilizado pelo site deve estar no mesmo diretório:
+   precos.xlsb
 
+   A leitura é dinâmica:
+   - não fixa quantidade de linhas;
+   - não fixa última coluna;
+   - identifica os cabeçalhos de meses;
+   - identifica ROL e Margem;
+   - identifica família/mercado/produto.
+   ========================================================= */
 
-        return numero.toLocaleString(
-            "pt-BR",
-            {
+const ARQUIVO_PRECOS = "precos.xlsb";
 
-                minimumFractionDigits: casas,
+let excelCarregado = false;
+let dadosPrecos = [];
+let mesesROL = [];
+let mesesMargem = [];
+let indicadorSelecionado = "rol";
+let familiaPrecoSelecionada = "";
+let ultimoMesDisponivel = "";
 
-                maximumFractionDigits: casas
+const ordemFamilias = [
+    "Asa","Cabeça","Cartilagem","CMS","Coração","Fígado",
+    "Moela","Peito","Perna","Pé","Dorso","Gordura","Sassami"
+];
 
+const mapaFamilias = {
+    "ASA":"Asa",
+    "CABÉCA":"Cabeça",
+    "CABECA":"Cabeça",
+    "CABEÇA":"Cabeça",
+    "CARTILAGEM":"Cartilagem",
+    "CMS":"CMS",
+    "CORAÇÃO":"Coração",
+    "CORACAO":"Coração",
+    "FÍGADO":"Fígado",
+    "FIGADO":"Fígado",
+    "MOELA":"Moela",
+    "PEITO":"Peito",
+    "PERNA":"Perna",
+    "PÉ":"Pé",
+    "PES":"Pé",
+    "PÉS":"Pé",
+    "DORSO":"Dorso",
+    "GORDURA":"Gordura",
+    "SASSAMI":"Sassami"
+};
+
+const mesesOrdem = [
+    "JAN","FEV","MAR","ABR","MAI","JUN",
+    "JUL","AGO","SET","OUT","NOV","DEZ"
+];
+
+function textoLimpo(v){
+    return String(v ?? "")
+        .trim()
+        .replace(/\s+/g," ");
+}
+
+function normalizarFamilia(v){
+    const t=textoLimpo(v).toUpperCase();
+    return mapaFamilias[t] || null;
+}
+
+function normalizarMes(v){
+    let t=textoLimpo(v).toUpperCase();
+    t=t.replace(/\s+PO$/,"").trim();
+    return mesesOrdem.includes(t) ? t : "";
+}
+
+function mesNumero(mes){
+    return mesesOrdem.indexOf(mes);
+}
+
+function formatarMoeda(valor){
+    if(valor === null || valor === undefined || valor === "" || isNaN(Number(valor))){
+        return "—";
+    }
+
+    return Number(valor).toLocaleString("pt-BR",{
+        style:"currency",
+        currency:"BRL",
+        minimumFractionDigits:2,
+        maximumFractionDigits:2
+    });
+}
+
+function mostrarStatus(texto,tipo){
+    const el=document.getElementById("statusExcel");
+    el.innerText=texto;
+    el.className="status mostrar "+tipo;
+}
+
+async function carregarPrecos(){
+
+    mostrarStatus("Carregando a aba Preços do arquivo Excel...","carregando");
+
+    try{
+
+        const resposta=await fetch(ARQUIVO_PRECOS+"?v="+Date.now());
+
+        if(!resposta.ok){
+            throw new Error(
+                "Não foi possível encontrar o arquivo " + ARQUIVO_PRECOS +
+                " no mesmo diretório do site."
+            );
+        }
+
+        const buffer=await resposta.arrayBuffer();
+
+        const workbook=XLSX.read(buffer,{
+            type:"array",
+            cellDates:true
+        });
+
+        if(!workbook.Sheets["Preços"]){
+            throw new Error('A aba "Preços" não foi encontrada no arquivo Excel.');
+        }
+
+        const sheet=workbook.Sheets["Preços"];
+
+        const matriz=XLSX.utils.sheet_to_json(sheet,{
+            header:1,
+            raw:true,
+            defval:null
+        });
+
+        interpretarTabelaPrecos(matriz);
+
+        excelCarregado=true;
+
+        montarFamiliasPrecos();
+        montarMeses();
+        montarMercados();
+
+        if(!familiaPrecoSelecionada){
+            const primeira=document.querySelector("#familiasPrecos .familia");
+            if(primeira){
+                primeira.click();
             }
+        }else{
+            renderTabelaPrecos();
+        }
+
+        mostrarStatus(
+            "Preços carregados com sucesso. Último mês disponível: "+
+            (ultimoMesDisponivel || "não identificado"),
+            "sucesso"
         );
 
+    }catch(erro){
+
+        console.error(erro);
+
+        mostrarStatus(
+            "Erro ao carregar os preços: " + erro.message +
+            ". Verifique se o arquivo está como 'precos.xlsb' e está no mesmo local do index.html.",
+            "erro"
+        );
+    }
+}
+
+function interpretarTabelaPrecos(matriz){
+
+    dadosPrecos=[];
+    mesesROL=[];
+    mesesMargem=[];
+
+    /*
+       Na estrutura atual da planilha:
+       - linha 5 (índice 4) contém os rótulos dos meses;
+       - ROL fica antes da primeira coluna "PO";
+       - Margem começa na primeira coluna "PO".
+
+       O código NÃO fixa a última coluna.
+       Ele usa a quantidade real de colunas da planilha.
+    */
+
+    let linhaCabecalho=-1;
+    let primeiraColunaDados=2;
+    let primeiraColunaMargem=-1;
+
+    for(let r=0;r<Math.min(matriz.length,15);r++){
+
+        const linha=matriz[r] || [];
+
+        let qtdMeses=0;
+
+        for(let c=2;c<linha.length;c++){
+            if(normalizarMes(linha[c])){
+                qtdMeses++;
+            }
+        }
+
+        if(qtdMeses>=3){
+            linhaCabecalho=r;
+            break;
+        }
     }
 
+    if(linhaCabecalho<0){
+        throw new Error("Não foi possível localizar a linha dos meses na aba Preços.");
+    }
 
+    const headers=matriz[linhaCabecalho] || [];
 
-    // ======================================================
-    // FUNÇÃO PRINCIPAL DE CÁLCULO
-    // ======================================================
+    for(let c=primeiraColunaDados;c<headers.length;c++){
 
-    function calcular() {
+        const original=textoLimpo(headers[c]);
+        const mes=normalizarMes(original);
 
+        if(!mes) continue;
 
-        // ==================================================
-        // PEGAR VALORES DIGITADOS
-        // ==================================================
+        if(/\sPO$/i.test(original)){
+            if(primeiraColunaMargem<0){
+                primeiraColunaMargem=c;
+            }
+        }
+    }
 
-        const cabecas =
-            parseFloat(
-                document.getElementById("cabecas").value
-            );
+    if(primeiraColunaMargem<0){
+        /*
+          Caso a planilha futura deixe de usar "PO",
+          procuramos a segunda seção pela linha 2/3.
+          Se não for possível, usamos a primeira metade como ROL.
+        */
+        const quantidade= headers.length-primeiraColunaDados;
+        primeiraColunaMargem=
+            primeiraColunaDados+Math.ceil(quantidade/2);
+    }
 
+    const colunasROL=[];
+    const colunasMargem=[];
 
-        const peso =
-            parseFloat(
-                document.getElementById("peso").value
-            );
+    for(let c=primeiraColunaDados;c<headers.length;c++){
 
+        const original=textoLimpo(headers[c]);
+        const mes=normalizarMes(original);
 
-        const producao =
-            parseFloat(
-                document.getElementById("producao").value
-            );
+        if(!mes) continue;
 
+        if(c<primeiraColunaMargem){
+            colunasROL.push({col:c,mes});
+        }else{
+            colunasMargem.push({col:c,mes});
+        }
+    }
 
-        const erro =
-            document.getElementById("mensagemErro");
+    mesesROL=colunasROL.map(x=>x.mes);
+    mesesMargem=colunasMargem.map(x=>x.mes);
 
+    /*
+       Remove duplicidades mantendo a ordem.
+    */
+    mesesROL=[...new Set(mesesROL)];
+    mesesMargem=[...new Set(mesesMargem)];
 
-        erro.style.display = "none";
+    /*
+       No caso de existirem os mesmos meses em seções diferentes,
+       mantemos a ordem cronológica.
+    */
+    mesesROL.sort((a,b)=>mesNumero(a)-mesNumero(b));
+    mesesMargem.sort((a,b)=>mesNumero(a)-mesNumero(b));
 
+    const mapaColunasROL={};
+    const mapaColunasMargem={};
 
+    colunasROL.forEach(x=>mapaColunasROL[x.mes]=x.col);
+    colunasMargem.forEach(x=>mapaColunasMargem[x.mes]=x.col);
 
-        // ==================================================
-        // VALIDAÇÃO DAS CABEÇAS
-        // ==================================================
+    let familiaAtual="";
+    let mercadoAtual="";
 
-        if (!cabecas || cabecas <= 0) {
+    for(let r=linhaCabecalho+1;r<matriz.length;r++){
 
+        const linha=matriz[r] || [];
+        const nome=textoLimpo(linha[1]);
 
-            mostrarErro(
-                "Informe a quantidade de cabeças abatidas."
-            );
+        if(!nome) continue;
 
+        if(nome.toLowerCase()==="total geral") continue;
+        if(nome.toLowerCase()==="(vazio)") continue;
 
-            return;
+        const familiaDetectada=normalizarFamilia(nome);
 
+        if(familiaDetectada){
+
+            familiaAtual=familiaDetectada;
+            mercadoAtual="";
+            continue;
         }
 
+        /*
+          Se a linha não possui código/produto e possui valores,
+          tratamos como mercado.
+        */
+        const pareceProduto=/^\d+\s*[-–]/.test(nome);
 
+        if(!pareceProduto){
 
-        // ==================================================
-        // VALIDAÇÃO DO PESO
-        // ==================================================
+            const possuiValor=
+                colunasROL.some(x=>linha[x.col]!==null && linha[x.col]!=="" && !isNaN(Number(linha[x.col]))) ||
+                colunasMargem.some(x=>linha[x.col]!==null && linha[x.col]!=="" && !isNaN(Number(linha[x.col])));
 
-        if (!peso || peso <= 0) {
+            if(possuiValor){
+                mercadoAtual=nome;
+            }
 
-
-            mostrarErro(
-                "Informe o peso médio do frango."
-            );
-
-
-            return;
-
+            continue;
         }
 
-
-
-        // ==================================================
-        // VALIDAÇÃO DA FAMÍLIA
-        // ==================================================
-
-        if (!familiaSelecionada) {
-
-
-            mostrarErro(
-                "Selecione uma família."
-            );
-
-
-            return;
-
-        }
-
-
-
-        // ==================================================
-        // VALIDAÇÃO DA PRODUÇÃO
-        // ==================================================
-
-        if (!producao || producao < 0) {
-
-
-            mostrarErro(
-                "Informe a produção da família."
-            );
-
-
-            return;
-
-        }
-
-
-
-        // ==================================================
-        // BUSCAR META
-        // ==================================================
-
-        const meta =
-            metas[familiaSelecionada];
-
-
-
-        if (
-            meta === undefined ||
-            meta <= 0
-        ) {
-
-
-            mostrarErro(
-
-                "A meta da família " +
-                familiaSelecionada +
-                " ainda não foi cadastrada."
-
-            );
-
-
-            return;
-
-        }
-
-
-
-        // ==================================================
-        // BUSCAR ROL/KG
-        // ==================================================
-
-        const rol =
-            rolKg[familiaSelecionada];
-
-
-
-        if (
-            rol === undefined ||
-            rol <= 0
-        ) {
-
-
-            mostrarErro(
-
-                "O ROL/KG da família " +
-                familiaSelecionada +
-                " ainda não foi cadastrado."
-
-            );
-
-
-            return;
-
-        }
-
-
-
-        // ==================================================
-        // VOLUME DE ABATE
-        // ==================================================
-
-        const volumeAbate =
-            cabecas * peso;
-
-
-
-        // ==================================================
-        // RENDIMENTO
-        // ==================================================
-
-        const rendimento =
-            (producao / volumeAbate) * 100;
-
-
-
-        // ==================================================
-        // B100
-        // ==================================================
-
-        const b100 =
-            (rendimento / meta) * 100;
-
-
-
-        // ==================================================
-        // PRODUÇÃO ESPERADA PELA META
-        // ==================================================
-
-        const producaoMeta =
-            volumeAbate * (meta / 100);
-
-
-
-        // ==================================================
-        // DIFERENÇA ENTRE PRODUÇÃO REAL E META
-        // ==================================================
-
-        const diferencaProducao =
-            producao - producaoMeta;
-
-
-
-        // ==================================================
-        // R$/TON
-        // ==================================================
-
-        const rsTon =
-            (
-                (diferencaProducao * rol)
-                /
-                volumeAbate
-            ) * 1000;
-
-
-
-        // ==================================================
-        // PERDA DE PRODUTO
-        //
-        // Se rendimento estiver abaixo da meta,
-        // calcula a quantidade faltante.
-        //
-        // Se rendimento estiver igual ou acima da meta,
-        // perda = 0.
-        // ==================================================
-
-        let perdaProduto = 0;
-
-
-        if (rendimento < meta) {
-
-
-            perdaProduto =
-                (
-                    (meta - rendimento)
-                    / 100
-                ) * volumeAbate;
-
-        }
-
-
-
-        // ==================================================
-        // PERDA EM R$
-        //
-        // Perda de Produto × ROL/KG
-        // ==================================================
-
-        const perdaRs =
-            perdaProduto * rol;
-
-
-
-        // ==================================================
-        // MOSTRAR FAMÍLIA
-        // ==================================================
-
-        document.getElementById(
-            "resultadoFamilia"
-        ).innerText =
-            familiaSelecionada;
-
-
-
-        // ==================================================
-        // MOSTRAR VOLUME DE ABATE
-        // ==================================================
-
-        document.getElementById(
-            "resultadoAbate"
-        ).innerText =
-            formatarNumero(
-                volumeAbate,
-                2
-            ) + " kg";
-
-
-
-        // ==================================================
-        // MOSTRAR PRODUÇÃO
-        // ==================================================
-
-        document.getElementById(
-            "resultadoProducao"
-        ).innerText =
-            formatarNumero(
-                producao,
-                2
-            ) + " kg";
-
-
-
-        // ==================================================
-        // MOSTRAR RENDIMENTO
-        // ==================================================
-
-        document.getElementById(
-            "resultadoRendimento"
-        ).innerText =
-            formatarNumero(
-                rendimento,
-                2
-            ) + "%";
-
-
-
-        // ==================================================
-        // MOSTRAR META
-        // ==================================================
-
-        document.getElementById(
-            "resultadoMeta"
-        ).innerText =
-            formatarNumero(
-                meta,
-                2
-            ) + "%";
-
-
-
-        // ==================================================
-        // MOSTRAR B100
-        // ==================================================
-
-        document.getElementById(
-            "resultadoB100"
-        ).innerText =
-            formatarNumero(
-                b100,
-                2
-            );
-
-
-
-        // ==================================================
-        // MOSTRAR R$/TON
-        // ==================================================
-
-        document.getElementById(
-            "resultadoRsTon"
-        ).innerText =
-            "R$ " +
-            formatarNumero(
-                rsTon,
-                2
-            );
-
-
-
-        // ==================================================
-        // MOSTRAR PERDA DE PRODUTO
-        // ==================================================
-
-        document.getElementById(
-            "resultadoPerdaProduto"
-        ).innerText =
-            formatarNumero(
-                perdaProduto,
-                0
-            ) + " kg";
-
-
-
-        // ==================================================
-        // MOSTRAR PERDA EM R$
-        // ==================================================
-
-        document.getElementById(
-            "resultadoPerdaRs"
-        ).innerText =
-            "R$ " +
-            formatarNumero(
-                perdaRs,
-                0
-            );
-
-
-
-        // ==================================================
-        // MOSTRAR CARD DE RESULTADO
-        // ==================================================
-
-        document.getElementById(
-            "resultado"
-        ).style.display =
-            "block";
-
-
-
-        // ==================================================
-        // ROLAR A TELA ATÉ O RESULTADO
-        // ==================================================
-
-        document.getElementById(
-            "resultado"
-        ).scrollIntoView({
-
-            behavior: "smooth",
-
-            block: "start"
-
+        if(!familiaAtual) continue;
+
+        const item={
+            familia:familiaAtual,
+            mercado:mercadoAtual || "Sem mercado",
+            produto:nome,
+            rol:{},
+            margem:{}
+        };
+
+        colunasROL.forEach(x=>{
+            const valor=linha[x.col];
+            if(valor!==null && valor!=="" && !isNaN(Number(valor))){
+                item.rol[x.mes]=Number(valor);
+            }
         });
 
+        colunasMargem.forEach(x=>{
+            const valor=linha[x.col];
+            if(valor!==null && valor!=="" && !isNaN(Number(valor))){
+                item.margem[x.mes]=Number(valor);
+            }
+        });
+
+        /*
+          Só adiciona produtos que tenham pelo menos algum dado.
+        */
+        if(Object.keys(item.rol).length || Object.keys(item.margem).length){
+            dadosPrecos.push(item);
+        }
     }
 
+    /*
+      O último mês disponível é calculado olhando os dois indicadores.
+    */
+    const todosMeses=[...new Set([...mesesROL,...mesesMargem])];
 
+    todosMeses.sort((a,b)=>mesNumero(a)-mesNumero(b));
 
-    // ======================================================
-    // MOSTRAR ERRO
-    // ======================================================
+    ultimoMesDisponivel=todosMeses.length
+        ? todosMeses[todosMeses.length-1]
+        : "";
+}
 
-    function mostrarErro(mensagem) {
+function montarFamiliasPrecos(){
 
+    const area=document.getElementById("familiasPrecos");
+    area.innerHTML="";
 
-        const erro =
-            document.getElementById(
-                "mensagemErro"
-            );
+    const familiasEncontradas=[...new Set(dadosPrecos.map(x=>x.familia))];
 
+    familiasEncontradas.sort((a,b)=>{
+        const ia=ordemFamilias.indexOf(a);
+        const ib=ordemFamilias.indexOf(b);
+        if(ia<0 && ib<0) return a.localeCompare(b);
+        if(ia<0) return 1;
+        if(ib<0) return -1;
+        return ia-ib;
+    });
 
-        erro.innerText =
-            mensagem;
+    familiasEncontradas.forEach(familia=>{
 
+        const btn=document.createElement("button");
+        btn.className="familia";
+        btn.innerText=familia;
 
-        erro.style.display =
-            "block";
+        btn.onclick=function(){
+            document.querySelectorAll("#familiasPrecos .familia")
+                .forEach(b=>b.classList.remove("selecionada"));
 
+            btn.classList.add("selecionada");
+
+            familiaPrecoSelecionada=familia;
+
+            document.getElementById("familiaPrecoEscolhida").innerText=
+                "Família selecionada: "+familia;
+
+            montarMercados();
+            renderTabelaPrecos();
+        };
+
+        area.appendChild(btn);
+    });
+}
+
+function mesesAtuais(){
+
+    return indicadorSelecionado==="rol"
+        ? mesesROL
+        : mesesMargem;
+}
+
+function montarMeses(){
+
+    const meses=mesesAtuais();
+
+    const selects=[
+        document.getElementById("mesSelect"),
+        document.getElementById("mesInicio"),
+        document.getElementById("mesFim")
+    ];
+
+    selects.forEach(select=>{
+        select.innerHTML="";
+
+        meses.forEach(mes=>{
+            const op=document.createElement("option");
+            op.value=mes;
+            op.innerText=mes;
+            select.appendChild(op);
+        });
+    });
+
+    if(meses.length){
+
+        const ultimo=meses[meses.length-1];
+
+        document.getElementById("mesSelect").value=ultimo;
+        document.getElementById("mesInicio").value=
+            meses[Math.max(0,meses.length-3)];
+
+        document.getElementById("mesFim").value=ultimo;
     }
 
+    document.getElementById("infoUltimoMes").innerText=
+        meses.length ? meses[meses.length-1] : "-";
+}
 
+function montarMercados(){
+
+    const select=document.getElementById("mercadoSelect");
+    const valorAnterior=select.value;
+
+    select.innerHTML='<option value="">Todos os mercados</option>';
+
+    let lista=dadosPrecos;
+
+    if(familiaPrecoSelecionada){
+        lista=lista.filter(x=>x.familia===familiaPrecoSelecionada);
+    }
+
+    const mercados=[...new Set(lista.map(x=>x.mercado))]
+        .filter(Boolean)
+        .sort((a,b)=>a.localeCompare(b,"pt-BR"));
+
+    mercados.forEach(mercado=>{
+        const op=document.createElement("option");
+        op.value=mercado;
+        op.innerText=mercado;
+        select.appendChild(op);
+    });
+
+    if(mercados.includes(valorAnterior)){
+        select.value=valorAnterior;
+    }
+}
+
+function selecionarIndicador(tipo){
+
+    indicadorSelecionado=tipo;
+
+    document.getElementById("btnROL")
+        .classList.toggle("ativo",tipo==="rol");
+
+    document.getElementById("btnMargem")
+        .classList.toggle("ativo",tipo==="margem");
+
+    document.getElementById("infoIndicador").innerText=
+        tipo==="rol" ? "ROL/kg" : "Margem (R$/kg)";
+
+    montarMeses();
+    montarMercados();
+    renderTabelaPrecos();
+}
+
+function alterarPeriodoSelect(){
+
+    const tipo=document.getElementById("periodoSelect").value;
+    const personalizado=document.getElementById("periodoPersonalizado");
+
+    personalizado.classList.toggle("mostrar",tipo==="personalizado");
+
+    const meses=mesesAtuais();
+
+    if(tipo==="mes" && meses.length){
+        document.getElementById("mesSelect").value=meses[meses.length-1];
+    }
+
+    if(tipo==="trimestre" && meses.length){
+        document.getElementById("mesSelect").value=meses[meses.length-1];
+    }
+
+    renderTabelaPrecos();
+}
+
+function obterMesesSelecionados(){
+
+    const meses=mesesAtuais();
+
+    if(!meses.length) return [];
+
+    const tipo=document.getElementById("periodoSelect").value;
+
+    if(tipo==="mes"){
+        const mes=document.getElementById("mesSelect").value;
+        return mes ? [mes] : [];
+    }
+
+    if(tipo==="trimestre"){
+        return meses.slice(-3);
+    }
+
+    if(tipo==="3"){
+        return meses.slice(-3);
+    }
+
+    if(tipo==="6"){
+        return meses.slice(-6);
+    }
+
+    if(tipo==="12"){
+        return meses.slice(-12);
+    }
+
+    if(tipo==="personalizado"){
+
+        const inicio=document.getElementById("mesInicio").value;
+        const fim=document.getElementById("mesFim").value;
+
+        const i=meses.indexOf(inicio);
+        const f=meses.indexOf(fim);
+
+        if(i<0 || f<0) return [];
+
+        const menor=Math.min(i,f);
+        const maior=Math.max(i,f);
+
+        return meses.slice(menor,maior+1);
+    }
+
+    return [];
+}
+
+function renderTabelaPrecos(){
+
+    const thead=document.querySelector("#tabelaPrecos thead");
+    const tbody=document.querySelector("#tabelaPrecos tbody");
+
+    thead.innerHTML="";
+    tbody.innerHTML="";
+
+    if(!familiaPrecoSelecionada){
+
+        tbody.innerHTML=
+            '<tr><td class="nenhum">Selecione uma família para visualizar os produtos.</td></tr>';
+
+        document.getElementById("infoProdutos").innerText="0";
+        return;
+    }
+
+    const meses=obterMesesSelecionados();
+
+    if(!meses.length){
+
+        tbody.innerHTML=
+            '<tr><td class="nenhum">Não há meses disponíveis para este indicador.</td></tr>';
+
+        document.getElementById("infoProdutos").innerText="0";
+        return;
+    }
+
+    const mercado=document.getElementById("mercadoSelect").value;
+
+    let lista=dadosPrecos.filter(x=>x.familia===familiaPrecoSelecionada);
+
+    if(mercado){
+        lista=lista.filter(x=>x.mercado===mercado);
+    }
+
+    /*
+      Agrupa por mercado para manter a disposição parecida
+      com a planilha original.
+    */
+    const grupos={};
+
+    lista.forEach(item=>{
+        if(!grupos[item.mercado]) grupos[item.mercado]=[];
+        grupos[item.mercado].push(item);
+    });
+
+    const trHead=document.createElement("tr");
+
+    const thProduto=document.createElement("th");
+    thProduto.className="produto-col";
+    thProduto.innerText="Produto";
+    trHead.appendChild(thProduto);
+
+    meses.forEach(mes=>{
+        const th=document.createElement("th");
+        th.innerText=mes;
+        trHead.appendChild(th);
+    });
+
+    thead.appendChild(trHead);
+
+    let quantidadeProdutos=0;
+
+    Object.keys(grupos)
+        .sort((a,b)=>a.localeCompare(b,"pt-BR"))
+        .forEach(mercadoNome=>{
+
+            const trMercado=document.createElement("tr");
+            trMercado.className="mercado";
+
+            const tdMercado=document.createElement("td");
+            tdMercado.className="produto";
+            tdMercado.innerText=mercadoNome;
+            tdMercado.colSpan=meses.length+1;
+
+            trMercado.appendChild(tdMercado);
+            tbody.appendChild(trMercado);
+
+            grupos[mercadoNome].forEach(item=>{
+
+                quantidadeProdutos++;
+
+                const tr=document.createElement("tr");
+                tr.className="produto-linha";
+
+                const tdProduto=document.createElement("td");
+                tdProduto.className="produto";
+                tdProduto.innerText=item.produto;
+                tr.appendChild(tdProduto);
+
+                meses.forEach(mes=>{
+
+                    const td=document.createElement("td");
+                    td.className="valor";
+
+                    const dados=
+                        indicadorSelecionado==="rol"
+                            ? item.rol
+                            : item.margem;
+
+                    if(dados[mes] !== undefined){
+                        td.innerText=formatarMoeda(dados[mes]);
+                    }else{
+                        td.innerText="—";
+                        td.classList.add("vazio");
+                    }
+
+                    tr.appendChild(td);
+                });
+
+                tbody.appendChild(tr);
+            });
+        });
+
+    document.getElementById("infoProdutos").innerText=quantidadeProdutos;
+}
+
+
+/* =========================================================
+   INICIALIZAÇÃO
+   ========================================================= */
+
+document.addEventListener("DOMContentLoaded",function(){
+
+    /*
+      A tela inicial não carrega o Excel imediatamente.
+      O arquivo só é carregado quando o usuário abre
+      ROL/kg Produto.
+    */
+
+});
 </script>
-
-
 </body>
-
 </html>
