@@ -959,7 +959,6 @@ function interpretarTabelaPrecos(matriz){
     let linhaCabecalho=-1;
     let primeiraColunaDados=2;
     let primeiraColunaMargem=-1;
-    let colunaRotulos=1;
 
     for(let r=0;r<Math.min(matriz.length,15);r++){
 
@@ -984,17 +983,6 @@ function interpretarTabelaPrecos(matriz){
     }
 
     const headers=matriz[linhaCabecalho] || [];
-
-    // Localiza automaticamente a coluna onde ficam família, mercado e produto.
-    // Na planilha atual é a coluna B, mas não deixamos isso fixo.
-    for(let r=0;r<Math.min(matriz.length,linhaCabecalho+1);r++){
-        const linha=matriz[r] || [];
-        for(let c=0;c<Math.min(linha.length,primeiraColunaDados);c++){
-            if(textoLimpo(linha[c]).toUpperCase()==="RÓTULOS DE LINHA") {
-                colunaRotulos=c;
-            }
-        }
-    }
 
     for(let c=primeiraColunaDados;c<headers.length;c++){
 
@@ -1066,7 +1054,7 @@ function interpretarTabelaPrecos(matriz){
     for(let r=linhaCabecalho+1;r<matriz.length;r++){
 
         const linha=matriz[r] || [];
-        const nome=textoLimpo(linha[colunaRotulos]);
+        const nome=textoLimpo(linha[1]);
 
         if(!nome) continue;
 
