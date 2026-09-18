@@ -2206,22 +2206,16 @@ function renderICQuente(){
                         .replace(/\s+/g, " ")
                         .trim();
 
-            // Velocidade/Peso: "1° T | 2° T" ou equivalentes -> "1|2"
-            if(/^1\s*º\s*T\s*\|\s*2\s*º\s*T$/i.test(t)){
-                texto = "1 | 2";
-
-            // Demais linhas: "1 ° Turno" -> "1ºT"
-            }else if(/^1\s*º\s*Turno$/i.test(t)){
-                texto = "1ºT";
-
-            // "2 ° Turno" -> "2ºT"
-            }else if(/^2\s*º\s*Turno$/i.test(t)){
-                texto = "2ºT";
-
-            // Unidade -> Un.
-            }else if(/^Unidade$/i.test(t)){
-                texto = "Un.";
-            }
+                    // Velocidade/Peso: "1° T | 2° T" ou equivalentes -> "1|2"
+                    if(/^1º\s*T\s*\|\s*2º\s*T$/i.test(t)){
+                        texto = "1|2";
+                    // Demais linhas: 1º Turno / 1 ° Turno -> 1ºT
+                    }else if(/^1º\s*Turno$/i.test(t)){
+                        texto = "1ºT";
+                    }else if(/^2º\s*Turno$/i.test(t)){
+                        texto = "2ºT";
+                    }else if(/^Unidade$/i.test(t)){
+                        texto = "Un.";
                     }
                 }
 
