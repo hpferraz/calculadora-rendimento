@@ -449,7 +449,8 @@ body{
     padding:6px 6px;
     border-right:1px solid #dedede;
     border-bottom:1px solid #dedede;
-    white-space:nowrap;
+    white-space:normal;
+    overflow-wrap:anywhere;
     text-align:center;
     min-width:64px;
     background:#fff;
@@ -466,8 +467,11 @@ body{
     position:sticky;
     left:0;
     z-index:12;
-    min-width:180px;
+    min-width:90px;
+    max-width:90px;
     text-align:left;
+    white-space:normal;
+    overflow-wrap:anywhere;
 }
 .ic-tabela th.col-d,.ic-tabela td.col-d{
     position:sticky;
@@ -479,7 +483,8 @@ body{
     position:sticky;
     right:0;
     z-index:12;
-    min-width:64px;
+    min-width:45px;
+    max-width:45px;
 }
 .ic-tabela thead th.col-c,.ic-tabela thead th.col-d,.ic-tabela thead th.col-q{
     z-index:30;
@@ -498,7 +503,8 @@ body{
 }
 .ic-tabela .linha-r4 td,.ic-tabela .linha-r5 td{
     z-index:10;
-    background:#fff;
+    background:#fff !important;
+    background-color:#fff !important;
 }
 .ic-tabela .linha-r4 td.col-c,.ic-tabela .linha-r4 td.col-d,.ic-tabela .linha-r4 td.col-q,
 .ic-tabela .linha-r5 td.col-c,.ic-tabela .linha-r5 td.col-d,.ic-tabela .linha-r5 td.col-q{
@@ -544,11 +550,99 @@ body{
     .menu-inicial-3{grid-template-columns:1fr}
 }
 @media(max-width:650px){
-    .ic-tabela{font-size:9px}
-    .ic-tabela th,.ic-tabela td{padding:5px 4px;min-width:54px}
-    .ic-tabela th.col-c,.ic-tabela td.col-c{min-width:145px;max-width:145px}
-    .ic-tabela th.col-d,.ic-tabela td.col-d{left:145px;min-width:52px;max-width:52px}
-    .ic-tabela th.col-q,.ic-tabela td.col-q{min-width:55px;max-width:55px}
+    .ic-tabela{
+        font-size:8px;
+        line-height:1.12;
+    }
+
+    .ic-tabela th,.ic-tabela td{
+        padding:3px 2px;
+        min-width:48px;
+        max-width:64px;
+        white-space:normal;
+        overflow-wrap:anywhere;
+        word-break:break-word;
+    }
+
+    /* Coluna Item: aproximadamente metade da largura anterior */
+    .ic-tabela th.col-c,.ic-tabela td.col-c{
+        min-width:73px;
+        max-width:73px;
+        width:73px;
+        left:0;
+        padding-left:3px;
+        padding-right:3px;
+        white-space:normal;
+        overflow-wrap:anywhere;
+        word-break:break-word;
+    }
+
+    /* Turno mais estreito */
+    .ic-tabela th.col-d,.ic-tabela td.col-d{
+        left:73px;
+        min-width:38px;
+        max-width:38px;
+        width:38px;
+        padding-left:2px;
+        padding-right:2px;
+        white-space:normal;
+    }
+
+    /* META reduzida para 70% do tamanho anterior */
+    .ic-tabela th.col-q,.ic-tabela td.col-q{
+        min-width:39px;
+        max-width:39px;
+        width:39px;
+        right:0;
+        padding-left:2px;
+        padding-right:2px;
+        white-space:normal;
+    }
+
+    /* Linhas 4 e 5: compactas, com fundo branco opaco */
+    .ic-tabela .linha-r4 td,
+    .ic-tabela .linha-r5 td{
+        height:17px;
+        min-height:17px;
+        max-height:17px;
+        padding-top:1px;
+        padding-bottom:1px;
+        line-height:15px;
+        background:#fff !important;
+        background-color:#fff !important;
+        overflow:hidden;
+    }
+
+    /* Posições das linhas congeladas após reduzir suas alturas */
+    .ic-tabela .linha-r4 td{
+        top:28px;
+    }
+    .ic-tabela .linha-r5 td{
+        top:45px;
+    }
+
+    .ic-tabela .linha-r4 td.col-c,
+    .ic-tabela .linha-r5 td.col-c{
+        left:0;
+    }
+
+    .ic-tabela .linha-r4 td.col-d,
+    .ic-tabela .linha-r5 td.col-d{
+        left:73px;
+    }
+
+    /* Mantém as células congeladas totalmente opacas */
+    .ic-tabela .linha-r4 td,
+    .ic-tabela .linha-r5 td,
+    .ic-tabela .linha-r4 td.col-c,
+    .ic-tabela .linha-r4 td.col-d,
+    .ic-tabela .linha-r4 td.col-q,
+    .ic-tabela .linha-r5 td.col-c,
+    .ic-tabela .linha-r5 td.col-d,
+    .ic-tabela .linha-r5 td.col-q{
+        background:#fff !important;
+        opacity:1;
+    }
 }
 </style>
 </head>
@@ -2094,7 +2188,17 @@ function renderICQuente(){
                     ? (isPercent ? (n*100).toLocaleString("pt-BR",{maximumFractionDigits:0})+"%" : n.toLocaleString("pt-BR"))
                     : String(valor ?? "");
             }else if(col===3 || col===4){
-                td.innerText=String(valor ?? "");
+                let texto = String(valor ?? "");
+
+                /* Abreviações solicitadas para a coluna Turno */
+                if(col===4){
+                    if(texto === "1º Turno") texto = "1ºT";
+                    else if(texto === "2º Turno") texto = "2ºT";
+                    else if(texto === "Unidade") texto = "Un.";
+                    else if(texto === "1ºT|2ºT") texto = "1|2";
+                }
+
+                td.innerText=texto;
             }else if(icPeriodo==="dias" && col>=18){
                 const n=valorNumericoIC(valor);
                 td.innerText=valor instanceof Date
