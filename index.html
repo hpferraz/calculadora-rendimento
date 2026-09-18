@@ -376,6 +376,176 @@ body{
         max-width:300px;
     }
 }
+
+/* =========================================================
+   IC ÁREA QUENTE
+   ========================================================= */
+.menu-inicial-3{grid-template-columns:repeat(3,1fr)}
+.menu-btn.quente{background:#333}
+.menu-btn.quente:hover{background:#222}
+
+.ic-filtros{
+    display:flex;
+    flex-wrap:wrap;
+    gap:9px;
+    align-items:center;
+}
+.ic-toggle{
+    border:2px solid #ddd;
+    background:#fff;
+    color:#444;
+    border-radius:9px;
+    padding:11px 18px;
+    cursor:pointer;
+    font-weight:bold;
+    transition:.2s;
+}
+.ic-toggle:hover{border-color:#e30613;color:#e30613}
+.ic-toggle.ativo{background:#e30613;border-color:#e30613;color:#fff}
+
+.ic-categorias{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+}
+.ic-cat{
+    border:2px solid #ddd;
+    background:#fff;
+    color:#444;
+    border-radius:9px;
+    padding:10px 15px;
+    cursor:pointer;
+    font-weight:bold;
+}
+.ic-cat:hover{border-color:#ff5300;color:#ff5300}
+.ic-cat.ativo{background:#ff5300;border-color:#ff5300;color:#fff}
+
+.ic-status{
+    padding:11px 13px;
+    border-radius:8px;
+    background:#f5f6f8;
+    color:#555;
+    font-size:13px;
+    font-weight:bold;
+    margin-bottom:12px;
+}
+.ic-tabela-wrapper{
+    width:100%;
+    max-height:70vh;
+    overflow:auto;
+    border:1px solid #d9d9d9;
+    border-radius:10px;
+    background:#fff;
+    -webkit-overflow-scrolling:touch;
+}
+.ic-tabela{
+    border-collapse:separate;
+    border-spacing:0;
+    width:max-content;
+    min-width:100%;
+    font-size:12px;
+}
+.ic-tabela th,.ic-tabela td{
+    padding:8px 9px;
+    border-right:1px solid #dedede;
+    border-bottom:1px solid #dedede;
+    white-space:nowrap;
+    text-align:center;
+    min-width:88px;
+    background:#fff;
+}
+.ic-tabela thead th{
+    position:sticky;
+    top:0;
+    z-index:20;
+    background:#333;
+    color:#fff;
+    font-weight:bold;
+}
+.ic-tabela th.col-c,.ic-tabela td.col-c{
+    position:sticky;
+    left:0;
+    z-index:12;
+    min-width:260px;
+    text-align:left;
+}
+.ic-tabela th.col-d,.ic-tabela td.col-d{
+    position:sticky;
+    left:260px;
+    z-index:12;
+    min-width:95px;
+}
+.ic-tabela th.col-q,.ic-tabela td.col-q{
+    position:sticky;
+    right:0;
+    z-index:12;
+    min-width:88px;
+}
+.ic-tabela thead th.col-c,.ic-tabela thead th.col-d,.ic-tabela thead th.col-q{
+    z-index:30;
+    background:#e30613;
+}
+.ic-tabela td.col-c,.ic-tabela td.col-d,.ic-tabela td.col-q{
+    background:#fff;
+    font-weight:600;
+}
+.ic-tabela .linha-congelada td,
+.ic-tabela .linha-congelada th{
+    position:sticky;
+}
+.ic-tabela .linha-r4 td,.ic-tabela .linha-r5 td{
+    z-index:10;
+    background:#fff;
+}
+.ic-tabela .linha-r4 td.col-c,.ic-tabela .linha-r4 td.col-d,.ic-tabela .linha-r4 td.col-q,
+.ic-tabela .linha-r5 td.col-c,.ic-tabela .linha-r5 td.col-d,.ic-tabela .linha-r5 td.col-q{
+    z-index:18;
+    background:#fff;
+}
+.ic-tabela .linha-r4 td{top:34px}
+.ic-tabela .linha-r5 td{top:68px}
+.ic-tabela .linha-r4 td.col-q,.ic-tabela .linha-r5 td.col-q{z-index:19}
+.ic-tabela .linha-r4 td.col-c,.ic-tabela .linha-r5 td.col-c,
+.ic-tabela .linha-r4 td.col-d,.ic-tabela .linha-r5 td.col-d{z-index:19}
+
+.ic-tabela .categoria-contro td{
+    font-weight:700;
+}
+.ic-tabela .dia-acima-meta{
+    color:#c00000 !important;
+    font-weight:700;
+}
+.ic-tabela .mes-verde{background:#63be7b !important}
+.ic-tabela .mes-amarelo{background:#ffeb84 !important}
+.ic-tabela .mes-vermelho{background:#f8696b !important}
+
+.ic-legenda{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-top:10px;
+    font-size:12px;
+    color:#555;
+}
+.ic-leg{
+    display:flex;
+    align-items:center;
+    gap:5px;
+}
+.ic-quadrado{width:14px;height:14px;border-radius:3px;border:1px solid #ccc}
+.ic-quadrado.verde{background:#63be7b}
+.ic-quadrado.amarelo{background:#ffeb84}
+.ic-quadrado.vermelho{background:#f8696b}
+
+@media(max-width:800px){
+    .menu-inicial-3{grid-template-columns:1fr}
+}
+@media(max-width:650px){
+    .ic-tabela{font-size:11px}
+    .ic-tabela th,.ic-tabela td{padding:7px 8px;min-width:78px}
+    .ic-tabela th.col-c,.ic-tabela td.col-c{min-width:220px}
+    .ic-tabela th.col-d,.ic-tabela td.col-d{left:220px;min-width:82px}
+}
 </style>
 </head>
 
@@ -392,13 +562,17 @@ body{
         <div class="card">
             <div class="titulo">Selecione uma opção</div>
 
-            <div class="menu-inicial">
+            <div class="menu-inicial menu-inicial-3">
                 <button class="menu-btn" onclick="mostrarTela('telaCalculadora')">
                     🧮<br><br>CALCULADORA
                 </button>
 
                 <button class="menu-btn secundario" onclick="mostrarTela('telaPrecos')">
                     💰<br><br>ROL/kg PRODUTO
+                </button>
+
+                <button class="menu-btn quente" onclick="mostrarTela('telaICQuente'); iniciarICQuente();">
+                    🔥<br><br>IC AREA QUENTE
                 </button>
             </div>
         </div>
@@ -611,6 +785,55 @@ body{
                 </table>
             </div>
         </div>
+    </section>
+
+    <!-- ================= IC ÁREA QUENTE ================= -->
+    <section id="telaICQuente" class="view">
+
+        <button class="botao-voltar" onclick="mostrarTela('telaInicial')">← Voltar</button>
+
+        <div class="card">
+            <div class="titulo">IC Área Quente</div>
+
+            <div id="statusICQuente" class="ic-status">
+                Aguardando carregamento da planilha...
+            </div>
+
+            <div class="campo">
+                <label>Período</label>
+                <div class="ic-filtros">
+                    <button id="icBtnMeses" class="ic-toggle ativo" onclick="selecionarPeriodoIC('meses')">MESES</button>
+                    <button id="icBtnDias" class="ic-toggle" onclick="selecionarPeriodoIC('dias')">DIAS</button>
+                </div>
+            </div>
+
+            <div class="campo">
+                <label>Área</label>
+                <div class="ic-categorias">
+                    <button id="icCatEscald" class="ic-cat ativo" onclick="alternarCategoriaIC('Escald')">Escaldagem</button>
+                    <button id="icCatEviscer" class="ic-cat ativo" onclick="alternarCategoriaIC('Eviscer')">Evisceração</button>
+                    <button id="icCatMiudos" class="ic-cat ativo" onclick="alternarCategoriaIC('Miúdos')">Miúdos</button>
+                    <span class="ic-cat ativo" style="cursor:default;background:#666;border-color:#666;color:#fff">Contro (sempre visível)</span>
+                </div>
+            </div>
+
+            <div class="ic-legenda">
+                <span class="ic-leg"><span class="ic-quadrado verde"></span> Faixa inferior</span>
+                <span class="ic-leg"><span class="ic-quadrado amarelo"></span> Faixa intermediária</span>
+                <span class="ic-leg"><span class="ic-quadrado vermelho"></span> Faixa superior</span>
+                <span>Vermelho na visualização diária = acima da meta.</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="ic-tabela-wrapper">
+                <table id="tabelaICQuente" class="ic-tabela">
+                    <thead></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
     </section>
 </div>
 
@@ -1562,6 +1785,328 @@ document.addEventListener("DOMContentLoaded",function(){
     */
 
 });
+
+/* =========================================================
+   IC ÁREA QUENTE
+   Arquivo no GitHub: "IC Hashdata Area Quente.xlsx"
+   A leitura é feita diretamente da aba "IC Quente".
+   ========================================================= */
+const ARQUIVO_IC_QUENTE = "IC Hashdata Area Quente.xlsx";
+
+let icQuenteCarregado = false;
+let icMatriz = [];
+let icPeriodo = "meses";
+let icCategorias = new Set(["Escald","Eviscer","Miúdos"]);
+
+const icColunasMeses = [];
+for(let c=5;c<=16;c++) icColunasMeses.push(c); // E:P
+const icColunasDias = [];
+for(let c=18;c<=39;c++) icColunasDias.push(c); // R:AM
+
+/* Regras copiadas da formatação condicional da planilha enviada.
+   A escala de cores é aplicada nas mesmas linhas e faixas da planilha.
+   Os valores são relativos às células da própria linha, conforme o Excel. */
+const icEscalasMes = {
+    8:[0.04,0.06,0.10],
+    11:[0.00,0.02,0.10],
+    14:[0.00,0.02,0.10],
+    17:[0.01,0.02,0.05],
+    20:[0.00,0.02,0.10],
+    23:[0.01,0.02,0.05],
+    26:[0.03,0.05,0.80],
+    29:[0.02,0.05,0.07],
+    32:[0.02,0.05,0.07],
+    35:[0.02,0.05,0.07],
+    38:[0.02,0.05,0.07],
+    41:[0.02,0.05,0.07],
+    44:[0.04,0.06,0.10],
+    47:[0.04,0.06,0.10],
+    50:[0.01,0.02,0.05],
+    53:[0.02,0.05,0.07],
+    56:[0.01,0.02,0.05],
+    59:[0.01,0.02,0.05],
+    62:[0.28,0.34,0.40],
+    65:[0.15,0.20,0.25],
+    68:[0.03,0.05,0.80],
+    71:[0.00,0.02,0.10],
+    74:[0.00,0.02,0.10],
+    77:[0.01,0.02,0.05],
+    80:[0.00,0.02,0.10],
+    83:[0.00,0.015,0.03]
+};
+
+function mostrarStatusIC(texto, tipo=""){
+    const el=document.getElementById("statusICQuente");
+    if(!el) return;
+    el.innerText=texto;
+    el.style.background =
+        tipo==="erro" ? "#ffe5e5" :
+        tipo==="sucesso" ? "#e9f8ee" : "#f5f6f8";
+    el.style.color =
+        tipo==="erro" ? "#b00000" :
+        tipo==="sucesso" ? "#176b35" : "#555";
+}
+
+function normalizarCategoriaIC(v){
+    const t=String(v ?? "").trim().toUpperCase();
+    if(t==="ESCALD" || t.startsWith("ESCALD")) return "Escald";
+    if(t==="EVISCER" || t.startsWith("EVISCER")) return "Eviscer";
+    if(t==="MIÚDOS" || t==="MIUDOS" || t==="MÍUDOS" || t==="MIUDOS" || t.startsWith("MIÚD") || t.startsWith("MIUD") || t.startsWith("MÍUD")) return "Miúdos";
+    if(t==="CONTRO" || t.startsWith("CONTRO")) return "Contro";
+    return "";
+}
+
+function formatarDataIC(v){
+    if(v instanceof Date && !isNaN(v)){
+        return v.toLocaleDateString("pt-BR",{day:"2-digit",month:"2-digit"});
+    }
+    if(typeof v==="number"){
+        const d=XLSX.SSF.parse_date_code(v);
+        if(d) return String(d.d).padStart(2,"0")+"/"+String(d.m).padStart(2,"0");
+    }
+    return String(v ?? "").trim();
+}
+
+function valorNumericoIC(v){
+    if(v===null || v===undefined || v==="") return null;
+    if(typeof v==="number") return isFinite(v)?v:null;
+    const n=Number(String(v).replace("%","").replace(",",".").trim());
+    return isFinite(n)?n:null;
+}
+
+function interpolarCorIC(v, limites){
+    if(v===null || !limites) return "";
+    const [a,b,c]=limites;
+    if(v<=a) return "mes-verde";
+    if(v>=c) return "mes-vermelho";
+    if(v<=b) return "mes-verde-amarelo";
+    return "mes-amarelo-vermelho";
+}
+
+/* Faz uma aproximação contínua da escala de três cores do Excel. */
+function aplicarEscalaIC(td, valor, limites){
+    if(valor===null || !limites) return;
+    const [a,b,c]=limites;
+    let r,g,cor1,cor2,t;
+
+    if(valor<=a){
+        td.classList.add("mes-verde");
+        return;
+    }
+    if(valor>=c){
+        td.classList.add("mes-vermelho");
+        return;
+    }
+
+    const verde=[99,190,123], amarelo=[255,235,132], vermelho=[248,105,107];
+
+    if(valor<=b){
+        t=(valor-a)/(b-a || 1);
+        r=Math.round(verde[0]+(amarelo[0]-verde[0])*t);
+        g=Math.round(verde[1]+(amarelo[1]-verde[1])*t);
+        const bl=Math.round(verde[2]+(amarelo[2]-verde[2])*t);
+        td.style.background=`rgb(${r},${g},${bl})`;
+    }else{
+        t=(valor-b)/(c-b || 1);
+        r=Math.round(amarelo[0]+(vermelho[0]-amarelo[0])*t);
+        g=Math.round(amarelo[1]+(vermelho[1]-amarelo[1])*t);
+        const bl=Math.round(amarelo[2]+(vermelho[2]-amarelo[2])*t);
+        td.style.background=`rgb(${r},${g},${bl})`;
+    }
+}
+
+async function iniciarICQuente(){
+    if(icQuenteCarregado) return;
+
+    mostrarStatusIC("Carregando a aba IC Quente...");
+
+    try{
+        const resposta=await fetch(
+            ARQUIVO_IC_QUENTE+"?v="+Date.now()
+        );
+
+        if(!resposta.ok){
+            throw new Error("arquivo não encontrado");
+        }
+
+        const buffer=await resposta.arrayBuffer();
+
+        const workbook=XLSX.read(buffer,{
+            type:"array",
+            cellDates:true
+        });
+
+        if(!workbook.Sheets["IC Quente"]){
+            throw new Error('a aba "IC Quente" não foi encontrada');
+        }
+
+        const sheet=workbook.Sheets["IC Quente"];
+
+        icMatriz=XLSX.utils.sheet_to_json(sheet,{
+            header:1,
+            raw:true,
+            defval:null
+        });
+
+        if(!icMatriz.length || icMatriz.length<5){
+            throw new Error("a aba IC Quente está vazia ou incompleta");
+        }
+
+        icQuenteCarregado=true;
+        renderICQuente();
+
+        mostrarStatusIC(
+            "IC Área Quente carregado com sucesso.",
+            "sucesso"
+        );
+
+    }catch(e){
+        console.error(e);
+        mostrarStatusIC(
+            "Erro ao carregar a planilha: "+e.message+
+            '. O arquivo deve estar no GitHub com o nome "'+
+            ARQUIVO_IC_QUENTE+'".',
+            "erro"
+        );
+    }
+}
+
+function selecionarPeriodoIC(tipo){
+    icPeriodo=tipo;
+
+    document.getElementById("icBtnMeses").classList.toggle("ativo",tipo==="meses");
+    document.getElementById("icBtnDias").classList.toggle("ativo",tipo==="dias");
+
+    renderICQuente();
+}
+
+function alternarCategoriaIC(categoria){
+    if(icCategorias.has(categoria)){
+        icCategorias.delete(categoria);
+    }else{
+        icCategorias.add(categoria);
+    }
+
+    document.getElementById("icCatEscald").classList.toggle("ativo",icCategorias.has("Escald"));
+    document.getElementById("icCatEviscer").classList.toggle("ativo",icCategorias.has("Eviscer"));
+    document.getElementById("icCatMiudos").classList.toggle("ativo",icCategorias.has("Miúdos"));
+
+    renderICQuente();
+}
+
+function deveMostrarLinhaIC(row, excelRow){
+    /* Linha 3 é o cabeçalho. Linhas 4 e 5 são Contro e ficam sempre. */
+    if(excelRow===4 || excelRow===5) return true;
+
+    const categoria=normalizarCategoriaIC(row[0]);
+
+    if(categoria==="Contro") return true;
+
+    return icCategorias.has(categoria);
+}
+
+function nomeCabecalhoIC(v, col){
+    if(col===17) return "META";
+    return formatarDataIC(v);
+}
+
+function renderICQuente(){
+    const tabela=document.getElementById("tabelaICQuente");
+    if(!tabela) return;
+
+    const thead=tabela.querySelector("thead");
+    const tbody=tabela.querySelector("tbody");
+
+    thead.innerHTML="";
+    tbody.innerHTML="";
+
+    if(!icMatriz.length) return;
+
+    const colunas=icPeriodo==="meses"
+        ? icColunasMeses
+        : icColunasDias;
+
+    /* Cabeçalho: C, D, período selecionado e Q. */
+    const trHead=document.createElement("tr");
+
+    [3,4,...colunas,17].forEach(col=>{
+        const th=document.createElement("th");
+        th.innerText=nomeCabecalhoIC(icMatriz[2]?.[col-1],col);
+        th.classList.add("col-"+openpyxlColunaIC(col));
+        trHead.appendChild(th);
+    });
+
+    thead.appendChild(trHead);
+
+    for(let r=3;r<icMatriz.length;r++){
+        const row=icMatriz[r] || [];
+        const excelRow=r+1;
+
+        if(!deveMostrarLinhaIC(row,excelRow)) continue;
+
+        const tr=document.createElement("tr");
+        tr.classList.add("linha-dados");
+
+        if(excelRow===4 || excelRow===5){
+            tr.classList.add("linha-congelada","linha-r"+excelRow);
+        }
+
+        if(normalizarCategoriaIC(row[0])==="Contro"){
+            tr.classList.add("categoria-contro");
+        }
+
+        [3,4,...colunas,17].forEach(col=>{
+            const td=document.createElement("td");
+            const valor=row[col-1];
+
+            td.classList.add("col-"+openpyxlColunaIC(col));
+
+            if(col===17){
+                td.innerText=valorNumericoIC(valor)!==null
+                    ? valorNumericoIC(valor)
+                    : String(valor ?? "");
+            }else if(col===3 || col===4){
+                td.innerText=String(valor ?? "");
+            }else if(icPeriodo==="dias" && col>=18){
+                td.innerText=valor instanceof Date
+                    ? formatarDataIC(valor)
+                    : (valorNumericoIC(valor)!==null
+                        ? valorNumericoIC(valor)
+                        : String(valor ?? ""));
+
+                const n=valorNumericoIC(valor);
+                const meta=valorNumericoIC(row[16]);
+
+                if(n!==null && meta!==null && n>meta){
+                    td.classList.add("dia-acima-meta");
+                }
+            }else{
+                const n=valorNumericoIC(valor);
+                td.innerText=n!==null
+                    ? n.toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2})
+                    : String(valor ?? "");
+
+                const escala=icEscalasMes[excelRow];
+                aplicarEscalaIC(td,n,escala);
+            }
+
+            tr.appendChild(td);
+        });
+
+        tbody.appendChild(tr);
+    }
+}
+
+/* Conversão simples de número de coluna para nome Excel. */
+function openpyxlColunaIC(n){
+    let out="";
+    while(n>0){
+        const r=(n-1)%26;
+        out=String.fromCharCode(65+r)+out;
+        n=Math.floor((n-1)/26);
+    }
+    return out.toLowerCase();
+}
 </script>
 </body>
 </html>
