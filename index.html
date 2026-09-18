@@ -511,11 +511,12 @@ body{
     z-index:18;
     background:#fff;
 }
-.ic-tabela .linha-r4 td{top:34px}
-.ic-tabela .linha-r5 td{top:68px}
+.ic-tabela thead th{height:32px; box-sizing:border-box;}
+.ic-tabela .linha-r4 td{top:32px}
+.ic-tabela .linha-r5 td{top:49px}
 .ic-tabela .linha-r4 td.col-q,.ic-tabela .linha-r5 td.col-q{z-index:19}
 .ic-tabela .linha-r4 td.col-c,.ic-tabela .linha-r5 td.col-c,
-.ic-tabela .linha-r4 td.col-d,.ic-tabela .linha-r5 td.col-d{z-index:19}
+.ic-tabela .linha-r4 td.col-d,.ic-tabela .linha-r5 td.col-d{z-index:28; background:#fff !important}
 
 .ic-tabela .categoria-contro td{
     font-weight:700;
@@ -614,11 +615,19 @@ body{
     }
 
     /* Posições das linhas congeladas após reduzir suas alturas */
+    .ic-tabela thead th{
+        height:30px;
+        min-height:30px;
+        max-height:30px;
+        line-height:26px;
+        box-sizing:border-box;
+    }
+
     .ic-tabela .linha-r4 td{
-        top:28px;
+        top:30px;
     }
     .ic-tabela .linha-r5 td{
-        top:45px;
+        top:47px;
     }
 
     .ic-tabela .linha-r4 td.col-c,
@@ -2192,10 +2201,22 @@ function renderICQuente(){
 
                 /* Abreviações solicitadas para a coluna Turno */
                 if(col===4){
-                    if(texto === "1º Turno") texto = "1ºT";
-                    else if(texto === "2º Turno") texto = "2ºT";
-                    else if(texto === "Unidade") texto = "Un.";
-                    else if(texto === "1ºT|2ºT") texto = "1|2";
+                    const t = texto
+                        .replace(/[°º]/g, "º")
+                        .replace(/\s+/g, " ")
+                        .trim();
+
+                    // Velocidade/Peso: "1° T | 2° T" ou equivalentes -> "1|2"
+                    if(/^1º\s*T\s*\|\s*2º\s*T$/i.test(t)){
+                        texto = "1|2";
+                    // Demais linhas: 1º Turno / 1 ° Turno -> 1ºT
+                    }else if(/^1º\s*Turno$/i.test(t)){
+                        texto = "1ºT";
+                    }else if(/^2º\s*Turno$/i.test(t)){
+                        texto = "2ºT";
+                    }else if(/^Unidade$/i.test(t)){
+                        texto = "Un.";
+                    }
                 }
 
                 td.innerText=texto;
