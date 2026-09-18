@@ -443,15 +443,15 @@ body{
     border-spacing:0;
     width:max-content;
     min-width:100%;
-    font-size:12px;
+    font-size:10.5px;
 }
 .ic-tabela th,.ic-tabela td{
-    padding:8px 9px;
+    padding:6px 6px;
     border-right:1px solid #dedede;
     border-bottom:1px solid #dedede;
     white-space:nowrap;
     text-align:center;
-    min-width:88px;
+    min-width:64px;
     background:#fff;
 }
 .ic-tabela thead th{
@@ -466,7 +466,7 @@ body{
     position:sticky;
     left:0;
     z-index:12;
-    min-width:260px;
+    min-width:180px;
     text-align:left;
 }
 .ic-tabela th.col-d,.ic-tabela td.col-d{
@@ -479,7 +479,7 @@ body{
     position:sticky;
     right:0;
     z-index:12;
-    min-width:88px;
+    min-width:64px;
 }
 .ic-tabela thead th.col-c,.ic-tabela thead th.col-d,.ic-tabela thead th.col-q{
     z-index:30;
@@ -488,6 +488,9 @@ body{
 .ic-tabela td.col-c,.ic-tabela td.col-d,.ic-tabela td.col-q{
     background:#fff;
     font-weight:600;
+}
+.ic-tabela td.celula-mesclada{
+    vertical-align:middle;
 }
 .ic-tabela .linha-congelada td,
 .ic-tabela .linha-congelada th{
@@ -541,10 +544,11 @@ body{
     .menu-inicial-3{grid-template-columns:1fr}
 }
 @media(max-width:650px){
-    .ic-tabela{font-size:11px}
-    .ic-tabela th,.ic-tabela td{padding:7px 8px;min-width:78px}
-    .ic-tabela th.col-c,.ic-tabela td.col-c{min-width:220px}
-    .ic-tabela th.col-d,.ic-tabela td.col-d{left:220px;min-width:82px}
+    .ic-tabela{font-size:9px}
+    .ic-tabela th,.ic-tabela td{padding:5px 4px;min-width:54px}
+    .ic-tabela th.col-c,.ic-tabela td.col-c{min-width:145px;max-width:145px}
+    .ic-tabela th.col-d,.ic-tabela td.col-d{left:145px;min-width:52px;max-width:52px}
+    .ic-tabela th.col-q,.ic-tabela td.col-q{min-width:55px;max-width:55px}
 }
 </style>
 </head>
@@ -813,7 +817,7 @@ body{
                     <button id="icCatEscald" class="ic-cat ativo" onclick="alternarCategoriaIC('Escald')">Escaldagem</button>
                     <button id="icCatEviscer" class="ic-cat ativo" onclick="alternarCategoriaIC('Eviscer')">Evisceração</button>
                     <button id="icCatMiudos" class="ic-cat ativo" onclick="alternarCategoriaIC('Miúdos')">Miúdos</button>
-                    <span class="ic-cat ativo" style="cursor:default;background:#666;border-color:#666;color:#fff">Contro (sempre visível)</span>
+                    
                 </div>
             </div>
 
@@ -1795,6 +1799,7 @@ const ARQUIVO_IC_QUENTE = "IC Hashdata Area Quente.xlsx";
 
 let icQuenteCarregado = false;
 let icMatriz = [];
+let icMerges = [];
 let icPeriodo = "meses";
 let icCategorias = new Set(["Escald","Eviscer","Miúdos"]);
 
@@ -1948,6 +1953,8 @@ async function iniciarICQuente(){
             defval:null
         });
 
+        icMerges = sheet["!merges"] || [];
+
         if(!icMatriz.length || icMatriz.length<5){
             throw new Error("a aba IC Quente está vazia ou incompleta");
         }
@@ -2010,6 +2017,16 @@ function nomeCabecalhoIC(v, col){
     return formatarDataIC(v);
 }
 
+function obterMesclaIC(col, excelRow){
+    const merges = icMerges || [];
+    for(const m of merges){
+        if(col >= m.s.c+1 && col <= m.e.c+1 && excelRow >= m.s.r+1 && excelRow <= m.e.r+1){
+            return {top:m.s.r+1,left:m.s.c+1,bottom:m.e.r+1,right:m.e.c+1};
+        }
+    }
+    return null;
+}
+
 function renderICQuente(){
     const tabela=document.getElementById("tabelaICQuente");
     if(!tabela) return;
@@ -2056,34 +2073,44 @@ function renderICQuente(){
         }
 
         [3,4,...colunas,17].forEach(col=>{
+            const merge=obterMesclaIC(col,excelRow);
+            if(merge && excelRow!==merge.top) return;
+
             const td=document.createElement("td");
             const valor=row[col-1];
 
             td.classList.add("col-"+openpyxlColunaIC(col));
 
+            if(merge && merge.bottom>merge.top && (col===3 || col===17)){
+                td.rowSpan=merge.bottom-merge.top+1;
+                td.classList.add("celula-mesclada");
+            }
+
+            const isPercent = excelRow>=6;
+
             if(col===17){
-                td.innerText=valorNumericoIC(valor)!==null
-                    ? valorNumericoIC(valor)
+                const n=valorNumericoIC(valor);
+                td.innerText=n!==null
+                    ? (isPercent ? (n*100).toLocaleString("pt-BR",{maximumFractionDigits:0})+"%" : n.toLocaleString("pt-BR"))
                     : String(valor ?? "");
             }else if(col===3 || col===4){
                 td.innerText=String(valor ?? "");
             }else if(icPeriodo==="dias" && col>=18){
+                const n=valorNumericoIC(valor);
                 td.innerText=valor instanceof Date
                     ? formatarDataIC(valor)
-                    : (valorNumericoIC(valor)!==null
-                        ? valorNumericoIC(valor)
+                    : (n!==null
+                        ? (isPercent ? (n*100).toLocaleString("pt-BR",{maximumFractionDigits:0})+"%" : n.toLocaleString("pt-BR"))
                         : String(valor ?? ""));
 
-                const n=valorNumericoIC(valor);
                 const meta=valorNumericoIC(row[16]);
-
                 if(n!==null && meta!==null && n>meta){
                     td.classList.add("dia-acima-meta");
                 }
             }else{
                 const n=valorNumericoIC(valor);
                 td.innerText=n!==null
-                    ? n.toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2})
+                    ? (isPercent ? (n*100).toLocaleString("pt-BR",{maximumFractionDigits:0})+"%" : n.toLocaleString("pt-BR"))
                     : String(valor ?? "");
 
                 const escala=icEscalasMes[excelRow];
