@@ -945,192 +945,288 @@ function interpretarTabelaPrecos(matriz){
     dadosPrecos=[];
     mesesROL=[];
     mesesMargem=[];
+    ultimoMesDisponivel="";
 
     /*
-       Na estrutura atual da planilha:
-       - linha 5 (índice 4) contém os rótulos dos meses;
-       - ROL fica antes da primeira coluna "PO";
-       - Margem começa na primeira coluna "PO".
+      Estrutura atual:
+      - linha acima do cabeçalho: ROL (R$/kg) / Margem (R$/kg)
+      - cabeçalho: FAMÍLIA / MERCADO PRINCIPAL / PRODUTO / meses
+      - abaixo: produtos.
 
-       O código NÃO fixa a última coluna.
-       Ele usa a quantidade real de colunas da planilha.
+      Nenhuma coluna é fixada. Assim, novos meses inseridos futuramente
+      serão encontrados automaticamente.
     */
 
     let linhaCabecalho=-1;
-    let primeiraColunaDados=2;
-    let primeiraColunaMargem=-1;
+    let colunaFamilia=-1;
+    let colunaMercado=-1;
+    let colunaProduto=-1;
 
-    for(let r=0;r<Math.min(matriz.length,15);r++){
+    // Localiza o cabeçalho real da tabela.
+    for(let r=0;r<Math.min(matriz.length,30);r++){
 
         const linha=matriz[r] || [];
+        let f=-1,m=-1,p=-1;
 
-        let qtdMeses=0;
+        for(let c=0;c<linha.length;c++){
 
-        for(let c=2;c<linha.length;c++){
-            if(normalizarMes(linha[c])){
-                qtdMeses++;
-            }
+            const valor=textoLimpo(linha[c]).toUpperCase();
+
+            if(valor==="FAMÍLIA" || valor==="FAMILIA") f=c;
+            if(valor==="MERCADO PRINCIPAL") m=c;
+            if(valor==="PRODUTO") p=c;
         }
 
-        if(qtdMeses>=3){
+        if(f>=0 && m>=0 && p>=0){
             linhaCabecalho=r;
+            colunaFamilia=f;
+            colunaMercado=m;
+            colunaProduto=p;
             break;
         }
     }
 
     if(linhaCabecalho<0){
-        throw new Error("Não foi possível localizar a linha dos meses na aba Preços.");
+        throw new Error(
+            'Não foi possível localizar "FAMÍLIA / MERCADO PRINCIPAL / PRODUTO" na aba Preços.'
+        );
     }
 
     const headers=matriz[linhaCabecalho] || [];
 
-    for(let c=primeiraColunaDados;c<headers.length;c++){
+    /*
+      Identifica a linha que informa quais colunas são ROL e quais são
+      Margem. Na planilha enviada essa informação está acima dos meses.
+    */
+    let linhaSecao=-1;
 
-        const original=textoLimpo(headers[c]);
-        const mes=normalizarMes(original);
+    for(let r=linhaCabecalho-1;r>=0;r--){
 
-        if(!mes) continue;
+        const linha=matriz[r] || [];
+        let temROL=false;
+        let temMargem=false;
 
-        if(/\sPO$/i.test(original)){
-            if(primeiraColunaMargem<0){
-                primeiraColunaMargem=c;
+        for(let c=0;c<linha.length;c++){
+
+            const valor=textoLimpo(linha[c]).toUpperCase();
+
+            if(valor.includes("ROL") && valor.includes("R$/KG")){
+                temROL=true;
+            }
+
+            if(valor.includes("MARGEM") && valor.includes("R$/KG")){
+                temMargem=true;
             }
         }
-    }
 
-    if(primeiraColunaMargem<0){
-        /*
-          Caso a planilha futura deixe de usar "PO",
-          procuramos a segunda seção pela linha 2/3.
-          Se não for possível, usamos a primeira metade como ROL.
-        */
-        const quantidade= headers.length-primeiraColunaDados;
-        primeiraColunaMargem=
-            primeiraColunaDados+Math.ceil(quantidade/2);
+        if(temROL || temMargem){
+            linhaSecao=r;
+            break;
+        }
     }
 
     const colunasROL=[];
     const colunasMargem=[];
 
-    for(let c=primeiraColunaDados;c<headers.length;c++){
+    if(linhaSecao>=0){
 
-        const original=textoLimpo(headers[c]);
-        const mes=normalizarMes(original);
+        const secao=matriz[linhaSecao] || [];
 
-        if(!mes) continue;
+        for(let c=0;c<headers.length;c++){
 
-        if(c<primeiraColunaMargem){
-            colunasROL.push({col:c,mes});
-        }else{
-            colunasMargem.push({col:c,mes});
+            const tipo=textoLimpo(secao[c]).toUpperCase();
+            const mes=normalizarMes(headers[c]);
+
+            if(!mes) continue;
+
+            if(tipo.includes("ROL")){
+                colunasROL.push({col:c,mes});
+            }
+            else if(tipo.includes("MARGEM")){
+                colunasMargem.push({col:c,mes});
+            }
         }
     }
 
-    mesesROL=colunasROL.map(x=>x.mes);
-    mesesMargem=colunasMargem.map(x=>x.mes);
+    /*
+      Fallback para versões antigas da planilha que usam "PO" para
+      identificar a segunda seção.
+    */
+    if(!colunasROL.length && !colunasMargem.length){
+
+        let primeiraColunaMargem=-1;
+
+        for(let c=0;c<headers.length;c++){
+
+            const original=textoLimpo(headers[c]);
+            const mes=normalizarMes(original);
+
+            if(!mes) continue;
+
+            if(/\sPO$/i.test(original)){
+                primeiraColunaMargem=c;
+                break;
+            }
+        }
+
+        if(primeiraColunaMargem>=0){
+
+            for(let c=0;c<headers.length;c++){
+
+                const mes=normalizarMes(headers[c]);
+
+                if(!mes) continue;
+
+                if(c<primeiraColunaMargem){
+                    colunasROL.push({col:c,mes});
+                }else{
+                    colunasMargem.push({col:c,mes});
+                }
+            }
+        }
+    }
 
     /*
-       Remove duplicidades mantendo a ordem.
+      Último fallback: divide os meses em duas partes.
     */
-    mesesROL=[...new Set(mesesROL)];
-    mesesMargem=[...new Set(mesesMargem)];
+    if(!colunasROL.length && !colunasMargem.length){
+
+        const candidatos=[];
+
+        for(let c=0;c<headers.length;c++){
+
+            const mes=normalizarMes(headers[c]);
+
+            if(mes){
+                candidatos.push({col:c,mes});
+            }
+        }
+
+        if(candidatos.length>=2){
+
+            const meio=Math.ceil(candidatos.length/2);
+
+            candidatos.forEach((x,i)=>{
+                if(i<meio){
+                    colunasROL.push(x);
+                }else{
+                    colunasMargem.push(x);
+                }
+            });
+        }
+    }
+
+    mesesROL=[...new Set(colunasROL.map(x=>x.mes))]
+        .sort((a,b)=>mesNumero(a)-mesNumero(b));
+
+    mesesMargem=[...new Set(colunasMargem.map(x=>x.mes))]
+        .sort((a,b)=>mesNumero(a)-mesNumero(b));
 
     /*
-       No caso de existirem os mesmos meses em seções diferentes,
-       mantemos a ordem cronológica.
+      Agora lê diretamente as três colunas da nova planilha:
+      FAMÍLIA | MERCADO PRINCIPAL | PRODUTO
+
+      Isso é importante: não dependemos mais de uma coluna "Rótulos de
+      Linha" que não existe no arquivo que você enviou agora.
     */
-    mesesROL.sort((a,b)=>mesNumero(a)-mesNumero(b));
-    mesesMargem.sort((a,b)=>mesNumero(a)-mesNumero(b));
-
-    const mapaColunasROL={};
-    const mapaColunasMargem={};
-
-    colunasROL.forEach(x=>mapaColunasROL[x.mes]=x.col);
-    colunasMargem.forEach(x=>mapaColunasMargem[x.mes]=x.col);
-
     let familiaAtual="";
     let mercadoAtual="";
 
     for(let r=linhaCabecalho+1;r<matriz.length;r++){
 
         const linha=matriz[r] || [];
-        const nome=textoLimpo(linha[1]);
 
-        if(!nome) continue;
+        const familiaTexto=textoLimpo(linha[colunaFamilia]);
+        const mercadoTexto=textoLimpo(linha[colunaMercado]);
+        const produtoTexto=textoLimpo(linha[colunaProduto]);
 
-        if(nome.toLowerCase()==="total geral") continue;
-        if(nome.toLowerCase()==="(vazio)") continue;
+        const familiaDireta=normalizarFamilia(familiaTexto);
 
-        const familiaDetectada=normalizarFamilia(nome);
+        if(familiaDireta){
+            familiaAtual=familiaDireta;
+        }
 
-        if(familiaDetectada){
+        if(
+            mercadoTexto &&
+            mercadoTexto.toLowerCase()!=="total geral" &&
+            mercadoTexto.toLowerCase()!=="(vazio)"
+        ){
+            mercadoAtual=mercadoTexto;
+        }
 
-            familiaAtual=familiaDetectada;
-            mercadoAtual="";
+        // Produto: código numérico seguido de hífen.
+        if(!/^\d+\s*[-–]/.test(produtoTexto)){
             continue;
         }
 
-        /*
-          Se a linha não possui código/produto e possui valores,
-          tratamos como mercado.
-        */
-        const pareceProduto=/^\d+\s*[-–]/.test(nome);
-
-        if(!pareceProduto){
-
-            const possuiValor=
-                colunasROL.some(x=>linha[x.col]!==null && linha[x.col]!=="" && !isNaN(Number(linha[x.col]))) ||
-                colunasMargem.some(x=>linha[x.col]!==null && linha[x.col]!=="" && !isNaN(Number(linha[x.col])));
-
-            if(possuiValor){
-                mercadoAtual=nome;
-            }
-
+        if(!familiaAtual){
             continue;
         }
-
-        if(!familiaAtual) continue;
 
         const item={
             familia:familiaAtual,
             mercado:mercadoAtual || "Sem mercado",
-            produto:nome,
+            produto:produtoTexto,
             rol:{},
             margem:{}
         };
 
         colunasROL.forEach(x=>{
+
             const valor=linha[x.col];
-            if(valor!==null && valor!=="" && !isNaN(Number(valor))){
+
+            if(
+                valor!==null &&
+                valor!=="" &&
+                valor!==undefined &&
+                !isNaN(Number(valor))
+            ){
                 item.rol[x.mes]=Number(valor);
             }
         });
 
         colunasMargem.forEach(x=>{
+
             const valor=linha[x.col];
-            if(valor!==null && valor!=="" && !isNaN(Number(valor))){
+
+            if(
+                valor!==null &&
+                valor!=="" &&
+                valor!==undefined &&
+                !isNaN(Number(valor))
+            ){
                 item.margem[x.mes]=Number(valor);
             }
         });
 
-        /*
-          Só adiciona produtos que tenham pelo menos algum dado.
-        */
-        if(Object.keys(item.rol).length || Object.keys(item.margem).length){
+        if(
+            Object.keys(item.rol).length ||
+            Object.keys(item.margem).length
+        ){
             dadosPrecos.push(item);
         }
     }
 
-    /*
-      O último mês disponível é calculado olhando os dois indicadores.
-    */
-    const todosMeses=[...new Set([...mesesROL,...mesesMargem])];
+    const todosMeses=[
+        ...new Set([
+            ...mesesROL,
+            ...mesesMargem
+        ])
+    ];
 
     todosMeses.sort((a,b)=>mesNumero(a)-mesNumero(b));
 
     ultimoMesDisponivel=todosMeses.length
         ? todosMeses[todosMeses.length-1]
         : "";
+
+    console.log("=== PREÇOS CARREGADOS ===");
+    console.log("Coluna Família:", colunaFamilia);
+    console.log("Coluna Mercado:", colunaMercado);
+    console.log("Coluna Produto:", colunaProduto);
+    console.log("Meses ROL:", mesesROL);
+    console.log("Meses Margem:", mesesMargem);
+    console.log("Produtos encontrados:", dadosPrecos.length);
 }
 
 function montarFamiliasPrecos(){
