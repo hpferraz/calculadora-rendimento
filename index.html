@@ -6,7 +6,10 @@
 <title>Calculadora de Rendimento</title>
 
 <!-- Leitor de Excel (.xlsb/.xlsx) -->
-<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js">
+
+
+</script>
 
 <style>
 *{box-sizing:border-box;margin:0;padding:0;font-family:Arial,Helvetica,sans-serif}
@@ -653,6 +656,71 @@ body{
         opacity:1;
     }
 }
+
+/* =========================================================
+   IC CORTES
+   ========================================================= */
+.menu-inicial-4{grid-template-columns:repeat(4,1fr)}
+.menu-btn.cortes{background:#e30613}
+.menu-btn.cortes:hover{background:#c90010}
+
+.icc-filtros{display:flex;flex-wrap:wrap;gap:9px;align-items:center}
+.icc-cat{
+    border:2px solid #ddd;background:#fff;color:#444;border-radius:9px;
+    padding:9px 14px;cursor:pointer;font-weight:bold;font-size:13px;
+}
+.icc-cat:hover{border-color:#ff5300;color:#ff5300}
+.icc-cat.ativo{background:#ff5300;border-color:#ff5300;color:#fff}
+.icc-status{
+    padding:10px 12px;border-radius:8px;background:#f5f6f8;color:#555;
+    font-size:13px;margin-bottom:14px;
+}
+.icc-tabela-wrapper{
+    width:100%;overflow:auto;border:1px solid #d7d7d7;border-radius:15px;
+    background:#fff;max-height:72vh;-webkit-overflow-scrolling:touch;
+}
+.icc-tabela{border-collapse:separate;border-spacing:0;width:max-content;min-width:100%;font-size:11px}
+.icc-tabela th,.icc-tabela td{
+    border-right:1px solid #d8d8d8;border-bottom:1px solid #d8d8d8;
+    padding:4px 3px;text-align:center;vertical-align:middle;
+    white-space:normal;overflow-wrap:anywhere;word-break:break-word;
+    min-width:54px;max-width:70px;background:#fff;
+}
+.icc-tabela thead th{
+    position:sticky;top:0;z-index:20;background:#333;color:#fff;
+    font-weight:bold;font-size:12px;height:32px;white-space:nowrap;
+}
+.icc-tabela thead th.col-e{background:#e30613;color:#fff}
+.icc-tabela thead th.col-s{background:#e30613;color:#fff}
+.icc-tabela th.col-e,.icc-tabela td.col-e{
+    position:sticky;left:0;z-index:12;min-width:73px;max-width:73px;width:73px;
+    text-align:left;white-space:normal;overflow-wrap:anywhere;word-break:break-word;
+}
+.icc-tabela th.col-f,.icc-tabela td.col-f{
+    position:sticky;left:73px;z-index:12;min-width:38px;max-width:38px;width:38px;
+}
+.icc-tabela th.col-s,.icc-tabela td.col-s{
+    position:sticky;right:0;z-index:12;min-width:39px;max-width:39px;width:39px;
+}
+.icc-tabela thead th.col-e,.icc-tabela thead th.col-f,.icc-tabela thead th.col-s{z-index:30}
+.icc-tabela td.col-e,.icc-tabela td.col-f,.icc-tabela td.col-s{background:#fff}
+.icc-tabela td.celula-mesclada{vertical-align:middle}
+.icc-tabela .icc-verde{background:#63be7b !important}
+.icc-tabela .icc-amarelo{background:#ffeb84 !important}
+.icc-tabela .icc-vermelho{background:#f8696b !important}
+.icc-legenda-cortes{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;font-size:12px;color:#555}
+.icc-legenda-cortes span{display:inline-flex;align-items:center;gap:5px}
+
+@media(max-width:800px){.menu-inicial-4{grid-template-columns:1fr 1fr}}
+@media(max-width:650px){
+    .menu-inicial-4{grid-template-columns:1fr}
+    .icc-tabela{font-size:8px;line-height:1.12}
+    .icc-tabela th,.icc-tabela td{padding:3px 2px;min-width:48px;max-width:64px}
+    .icc-tabela th.col-e,.icc-tabela td.col-e{min-width:73px;max-width:73px;width:73px;left:0;padding-left:3px;padding-right:3px}
+    .icc-tabela th.col-f,.icc-tabela td.col-f{left:73px;min-width:38px;max-width:38px;width:38px;padding-left:2px;padding-right:2px}
+    .icc-tabela th.col-s,.icc-tabela td.col-s{min-width:39px;max-width:39px;width:39px;right:0;padding-left:2px;padding-right:2px}
+}
+
 </style>
 </head>
 
@@ -669,7 +737,7 @@ body{
         <div class="card">
             <div class="titulo">Selecione uma opção</div>
 
-            <div class="menu-inicial menu-inicial-3">
+            <div class="menu-inicial menu-inicial-4">
                 <button class="menu-btn" onclick="mostrarTela('telaCalculadora')">
                     🧮<br><br>CALCULADORA
                 </button>
@@ -680,6 +748,10 @@ body{
 
                 <button class="menu-btn quente" onclick="mostrarTela('telaICQuente'); iniciarICQuente();">
                     🔥<br><br>IC AREA QUENTE
+                </button>
+
+                <button class="menu-btn cortes" onclick="mostrarTela('telaICCortes'); iniciarICCortes();">
+                    ✂️<br><br>IC CORTES
                 </button>
             </div>
         </div>
@@ -941,6 +1013,44 @@ body{
             </div>
         </div>
 
+    </section>
+
+    <!-- ================= IC CORTES ================= -->
+    <section id="telaICCortes" class="view">
+        <button class="botao-voltar" onclick="mostrarTela('telaInicial')">← Voltar</button>
+
+        <div class="card">
+            <div class="titulo">IC Cortes</div>
+            <div id="statusICCortes" class="icc-status">Aguardando carregamento da planilha...</div>
+
+            <div class="campo">
+                <label>Período</label>
+                <div class="ic-filtros">
+                    <button id="iccBtnMeses" class="ic-toggle ativo" onclick="selecionarPeriodoICC('meses')">MESES</button>
+                    <button id="iccBtnDias" class="ic-toggle" onclick="selecionarPeriodoICC('dias')">DIAS</button>
+                </div>
+            </div>
+
+            <div class="campo">
+                <label>Família</label>
+                <div id="iccFamilias" class="icc-filtros"></div>
+            </div>
+
+            <div class="icc-legenda-cortes">
+                <span><span class="ic-quadrado verde"></span> Faixa inferior</span>
+                <span><span class="ic-quadrado amarelo"></span> Faixa intermediária</span>
+                <span><span class="ic-quadrado vermelho"></span> Faixa superior</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="icc-tabela-wrapper">
+                <table id="tabelaICCortes" class="icc-tabela">
+                    <thead></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
     </section>
 </div>
 
@@ -2207,12 +2317,12 @@ function renderICQuente(){
                         .trim();
 
                     // Velocidade/Peso: "1° T | 2° T" ou equivalentes -> "1|2"
-                    if(/^1º\s*T\s*\|\s*2º\s*T$/i.test(t)){
+                    if(/^1\s*º\s*T\s*\|\s*2\s*º\s*T$/i.test(t)){
                         texto = "1|2";
-                    // Demais linhas: 1º Turno / 1 ° Turno -> 1ºT
-                    }else if(/^1º\s*Turno$/i.test(t)){
+                    // Demais linhas: a planilha usa "1 ° Turno" / "2 ° Turno".
+                    }else if(/^1\s*º\s*Turno$/i.test(t)){
                         texto = "1ºT";
-                    }else if(/^2º\s*Turno$/i.test(t)){
+                    }else if(/^2\s*º\s*Turno$/i.test(t)){
                         texto = "2ºT";
                     }else if(/^Unidade$/i.test(t)){
                         texto = "Un.";
@@ -2259,6 +2369,274 @@ function openpyxlColunaIC(n){
     }
     return out.toLowerCase();
 }
+
+/* =========================================================
+   IC CORTES
+   Arquivo no GitHub: "IC Hashdata Sala Cortes.xlsx"
+   Aba: "IC Cortes"
+   ========================================================= */
+const ARQUIVOS_IC_CORTES = [
+    "IC Hashdata Sala Cortes.xlsx",
+    "IC Hashdata Sala Cortes(3).xlsx"
+];
+
+let icCortesCarregado=false;
+let icCortesMatriz=[];
+let icCortesMerges=[];
+let icCortesPeriodo="meses";
+let icCortesFamilias=new Set();
+let icCortesFamiliasDisponiveis=[];
+
+// IC Cortes: E/F são Item/Turno, G:R são meses, S é Meta, U:AR são dias.
+const icCortesMeses=[];
+for(let c=7;c<=18;c++) icCortesMeses.push(c); // G:R
+const icCortesDias=[];
+for(let c=21;c<=44;c++) icCortesDias.push(c); // U:AR
+
+// Escalas extraídas da formatação condicional da planilha IC Cortes.
+// Cada entrada contém [mínimo, meio, máximo] e a direção das cores.
+const icCortesEscalasMes={
+    6:{lim:[5,7,10],dir:"baixo-vermelho"},
+    9:{lim:[5,7,10],dir:"baixo-vermelho"},
+    12:{lim:[5,7,10],dir:"baixo-vermelho"},
+    15:{lim:[5,7,10],dir:"baixo-vermelho"},
+    18:{lim:[0.75,0.88,0.95],dir:"baixo-vermelho"},
+    21:{lim:[0.75,0.88,0.95],dir:"baixo-vermelho"},
+    24:{lim:[5,7,10],dir:"baixo-vermelho"},
+    27:{lim:[5,7,10],dir:"baixo-vermelho"},
+    30:{lim:[5,7,10],dir:"baixo-vermelho"},
+    33:{lim:[5,7,10],dir:"baixo-vermelho"},
+    36:{lim:[5,7,10],dir:"baixo-vermelho"},
+    39:{lim:[5,7,10],dir:"baixo-vermelho"},
+    42:{lim:[5,7,10],dir:"baixo-vermelho"},
+    45:{lim:[5,7,10],dir:"baixo-vermelho"},
+    48:{lim:[0.18,0.20,0.25],dir:"baixo-verde"},
+    51:{lim:[0.10,0.16,0.17],dir:"baixo-verde"},
+    54:{lim:[0.60,0.69,0.73],dir:"baixo-verde"},
+    57:{lim:[0.00,0.06,0.10],dir:"baixo-verde"},
+    60:{lim:[5,7,10],dir:"baixo-vermelho"}
+};
+const icCortesEscalasDia={
+    6:{lim:[5,7,10],dir:"baixo-vermelho"},
+    9:{lim:[5,7,10],dir:"baixo-vermelho"},
+    12:{lim:[5,7,10],dir:"baixo-vermelho"},
+    15:{lim:[5,7,10],dir:"baixo-vermelho"},
+    18:{lim:[0.70,0.85,1.00],dir:"baixo-vermelho"},
+    21:{lim:[0.70,0.85,1.00],dir:"baixo-vermelho"},
+    24:{lim:[5,7,10],dir:"baixo-vermelho"},
+    27:{lim:[5,7,10],dir:"baixo-vermelho"},
+    30:{lim:[5,7,10],dir:"baixo-vermelho"},
+    33:{lim:[5,7,10],dir:"baixo-vermelho"},
+    36:{lim:[5,7,10],dir:"baixo-vermelho"},
+    39:{lim:[5,7,10],dir:"baixo-vermelho"},
+    42:{lim:[5,7,10],dir:"baixo-vermelho"},
+    45:{lim:[5,7,10],dir:"baixo-vermelho"},
+    48:{lim:[0.18,0.20,0.25],dir:"baixo-verde"},
+    51:{lim:[0.10,0.16,0.17],dir:"baixo-verde"},
+    54:{lim:[0.60,0.69,0.73],dir:"baixo-verde"},
+    57:{lim:[0.00,0.06,0.10],dir:"baixo-verde"},
+    60:{lim:[5,7,10],dir:"baixo-vermelho"}
+};
+
+function mostrarStatusICCortes(texto,tipo=""){
+    const el=document.getElementById("statusICCortes");
+    if(!el)return;
+    el.innerText=texto;
+    el.style.background=tipo==="erro"?"#ffe5e5":tipo==="sucesso"?"#e9f8ee":"#f5f6f8";
+    el.style.color=tipo==="erro"?"#b00000":tipo==="sucesso"?"#176b35":"#555";
+}
+
+function normalizarFamiliaICCortes(v){
+    return String(v??"").trim();
+}
+
+function formatarCabecalhoICCortes(v){
+    if(v instanceof Date && !isNaN(v)) return v.toLocaleDateString("pt-BR",{day:"2-digit",month:"2-digit"});
+    if(typeof v==="number"){
+        const d=XLSX.SSF.parse_date_code(v);
+        if(d)return String(d.d).padStart(2,"0")+"/"+String(d.m).padStart(2,"0");
+    }
+    return String(v??"").trim();
+}
+
+function valorNumericoICCortes(v){
+    if(v===null||v===undefined||v==="")return null;
+    if(typeof v==="number")return isFinite(v)?v:null;
+    const s=String(v).replace("%","").replace(",",".").trim();
+    const n=Number(s);
+    return isFinite(n)?n:null;
+}
+
+function ehPercentICCortes(row){
+    // Na planilha, os indicadores percentuais têm a meta armazenada como 0.x.
+    const meta=valorNumericoICCortes(row[18]);
+    return meta!==null && meta<1;
+}
+
+function formatarValorICCortes(v,isPercent){
+    const n=valorNumericoICCortes(v);
+    if(n===null)return String(v??"");
+    if(isPercent)return (n*100).toLocaleString("pt-BR",{maximumFractionDigits:0})+"%";
+    return n.toLocaleString("pt-BR",{minimumFractionDigits:1,maximumFractionDigits:1});
+}
+
+function aplicarEscalaICCortes(td,n,config){
+    if(n===null||!config)return;
+    const [a,b,c]=config.lim;
+    const verde=[99,190,123], amarelo=[255,235,132], vermelho=[248,105,107];
+    let low,mid,high;
+    if(config.dir==="baixo-verde"){
+        low=verde;mid=amarelo;high=vermelho;
+    }else{
+        low=vermelho;mid=amarelo;high=verde;
+    }
+    if(n<=a){td.style.background=`rgb(${low[0]},${low[1]},${low[2]})`;return;}
+    if(n>=c){td.style.background=`rgb(${high[0]},${high[1]},${high[2]})`;return;}
+    let t,r,g,bl;
+    if(n<=b){
+        t=(n-a)/(b-a||1);
+        r=Math.round(low[0]+(mid[0]-low[0])*t);
+        g=Math.round(low[1]+(mid[1]-low[1])*t);
+        bl=Math.round(low[2]+(mid[2]-low[2])*t);
+    }else{
+        t=(n-b)/(c-b||1);
+        r=Math.round(mid[0]+(high[0]-mid[0])*t);
+        g=Math.round(mid[1]+(high[1]-mid[1])*t);
+        bl=Math.round(mid[2]+(high[2]-mid[2])*t);
+    }
+    td.style.background=`rgb(${r},${g},${bl})`;
+}
+
+function obterMesclaICCortes(col,excelRow){
+    for(const m of (icCortesMerges||[])){
+        if(col>=m.s.c+1&&col<=m.e.c+1&&excelRow>=m.s.r+1&&excelRow<=m.e.r+1){
+            return {top:m.s.r+1,left:m.s.c+1,bottom:m.e.r+1,right:m.e.c+1};
+        }
+    }
+    return null;
+}
+
+function construirBotoesFamiliaICCortes(){
+    const box=document.getElementById("iccFamilias");
+    if(!box)return;
+    box.innerHTML="";
+    icCortesFamiliasDisponiveis.forEach(f=>{
+        const b=document.createElement("button");
+        b.className="icc-cat";
+        b.innerText=f;
+        b.onclick=()=>alternarFamiliaICCortes(f,b);
+        box.appendChild(b);
+    });
+}
+
+function alternarFamiliaICCortes(familia,botao){
+    if(icCortesFamilias.has(familia)){
+        icCortesFamilias.delete(familia);
+        botao.classList.remove("ativo");
+    }else{
+        icCortesFamilias.add(familia);
+        botao.classList.add("ativo");
+    }
+    renderICCortes();
+}
+
+function selecionarPeriodoICC(tipo){
+    icCortesPeriodo=tipo;
+    document.getElementById("iccBtnMeses").classList.toggle("ativo",tipo==="meses");
+    document.getElementById("iccBtnDias").classList.toggle("ativo",tipo==="dias");
+    renderICCortes();
+}
+
+async function iniciarICCortes(){
+    if(icCortesCarregado){renderICCortes();return;}
+    mostrarStatusICCortes("Carregando a aba IC Cortes...");
+    let ultimoErro="arquivo não encontrado";
+    for(const arquivo of ARQUIVOS_IC_CORTES){
+        try{
+            const resposta=await fetch(arquivo+"?v="+Date.now());
+            if(!resposta.ok){ultimoErro="HTTP "+resposta.status;continue;}
+            const buffer=await resposta.arrayBuffer();
+            const workbook=XLSX.read(buffer,{type:"array",cellDates:true});
+            if(!workbook.Sheets["IC Cortes"]){ultimoErro='a aba "IC Cortes" não foi encontrada';continue;}
+            const sheet=workbook.Sheets["IC Cortes"];
+            icCortesMatriz=XLSX.utils.sheet_to_json(sheet,{header:1,raw:true,defval:null});
+            icCortesMerges=sheet["!merges"]||[];
+            if(!icCortesMatriz.length||icCortesMatriz.length<4)throw new Error("aba vazia ou incompleta");
+            icCortesFamiliasDisponiveis=[...new Set(icCortesMatriz.slice(3).map(r=>normalizarFamiliaICCortes(r?.[2])).filter(Boolean))];
+            construirBotoesFamiliaICCortes();
+            icCortesCarregado=true;
+            renderICCortes();
+            mostrarStatusICCortes("IC Cortes carregado. Selecione uma ou mais famílias.","sucesso");
+            return;
+        }catch(e){ultimoErro=e.message;}
+    }
+    mostrarStatusICCortes('Erro ao carregar a planilha IC Cortes: '+ultimoErro+'. Use o nome "IC Hashdata Sala Cortes.xlsx" no GitHub.',"erro");
+}
+
+function renderICCortes(){
+    const tabela=document.getElementById("tabelaICCortes");
+    if(!tabela||!icCortesMatriz.length)return;
+    const thead=tabela.querySelector("thead"),tbody=tabela.querySelector("tbody");
+    thead.innerHTML="";tbody.innerHTML="";
+
+    if(icCortesFamilias.size===0){
+        const tr=document.createElement("tr"),td=document.createElement("td");
+        td.colSpan=20;td.innerText="Selecione uma ou mais famílias para visualizar os indicadores.";
+        td.style.padding="22px";td.style.color="#777";tr.appendChild(td);tbody.appendChild(tr);return;
+    }
+
+    let colunas=icCortesPeriodo==="meses"?icCortesMeses.filter(c=>icCortesMatriz[2]?.[c-1]!==null&&icCortesMatriz[2]?.[c-1]!==undefined&&icCortesMatriz[2]?.[c-1]!=="") : icCortesDias.filter(c=>icCortesMatriz[2]?.[c-1]!==null&&icCortesMatriz[2]?.[c-1]!==undefined&&icCortesMatriz[2]?.[c-1]!=="");
+    const exibicao=[5,6,...colunas,19];
+    const trHead=document.createElement("tr");
+    exibicao.forEach(col=>{
+        const th=document.createElement("th");
+        th.classList.add("col-"+openpyxlColunaIC(col));
+        th.innerText=col===19?"META":formatarCabecalhoICCortes(icCortesMatriz[2]?.[col-1]);
+        trHead.appendChild(th);
+    });
+    thead.appendChild(trHead);
+
+    for(let r=3;r<icCortesMatriz.length;r++){
+        const row=icCortesMatriz[r]||[];
+        const familia=normalizarFamiliaICCortes(row[2]);
+        if(!icCortesFamilias.has(familia))continue;
+        const excelRow=r+1;
+        const tr=document.createElement("tr");
+        exibicao.forEach(col=>{
+            const merge=obterMesclaICCortes(col,excelRow);
+            if(merge&&excelRow!==merge.top)return;
+            const td=document.createElement("td");
+            td.classList.add("col-"+openpyxlColunaIC(col));
+            if(merge&&merge.bottom>merge.top&&(col===5||col===19)){
+                td.rowSpan=merge.bottom-merge.top+1;td.classList.add("celula-mesclada");
+            }
+            const valor=row[col-1];
+            const isPercent=ehPercentICCortes(row);
+            if(col===5){
+                td.innerText=String(valor??"");
+            }else if(col===6){
+                let texto=String(valor??"").trim();
+                const t=texto.replace(/[°º]/g,"º").replace(/\s+/g," ").trim();
+                if(/^1\s*º\s*T\s*\|\s*2\s*º\s*T$/i.test(t))texto="1|2";
+                else if(/^1\s*º\s*Turno$/i.test(t))texto="1ºT";
+                else if(/^2\s*º\s*Turno$/i.test(t))texto="2ºT";
+                else if(/^Unidade$/i.test(t))texto="Uni.";
+                td.innerText=texto;
+            }else if(col===19){
+                td.innerText=formatarValorICCortes(valor,isPercent);
+            }else{
+                const n=valorNumericoICCortes(valor);
+                td.innerText=formatarValorICCortes(valor,isPercent);
+                const escala=(icCortesPeriodo==="meses"?icCortesEscalasMes:icCortesEscalasDia)[excelRow];
+                aplicarEscalaICCortes(td,n,escala);
+            }
+            tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+    }
+}
+
+
 </script>
 </body>
 </html>
