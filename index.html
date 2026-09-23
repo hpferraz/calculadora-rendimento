@@ -363,11 +363,6 @@ body{
     .familias{grid-template-columns:repeat(3,1fr)}
 }
 
-.ics-lancamentos th.datahora,.ics-lancamentos td.datahora{min-width:104px;}
-.ics-lancamentos th.sku,.ics-lancamentos td.sku{min-width:56px;}
-.ics-lancamentos th:not(.item):not(.meta-lanc):not(.datahora):not(.sku),.ics-lancamentos td:not(.item):not(.meta-lanc):not(.datahora):not(.sku){min-width:64px;}
-.ics-lancamentos th.item,.ics-lancamentos td.item{min-width:220px;}
-.ics-lancamentos th.meta-lanc,.ics-lancamentos td.meta-lanc{min-width:70px;}
 @media(max-width:650px){
     body{padding:12px 8px 30px}
     .cabecalho{padding:18px}
@@ -770,17 +765,16 @@ body{
 }
 .ics-tabela th.meta-col{position:sticky;right:0;z-index:30;background:#111}
 .ics-lancamentos td.datahora,.ics-lancamentos th.datahora{
-    position:sticky;left:0;z-index:12;background:#fff;min-width:104px;
+    position:sticky;left:0;z-index:12;background:#fff;min-width:130px;
 }
 .ics-lancamentos td.sku,.ics-lancamentos th.sku{
-    position:sticky;left:104px;z-index:12;background:#fff;min-width:56px;
+    position:sticky;left:130px;z-index:12;background:#fff;min-width:70px;
 }
-.ics-lancamentos thead th{font-size:8.8px}
 .ics-lancamentos th.datahora,.ics-lancamentos th.sku{background:#111;z-index:30}
 .ics-lancamentos td.item{text-align:left;min-width:220px;white-space:normal}
 .ics-lancamentos td.peso-alto{background:#e30613!important;color:#fff!important;font-weight:bold}
-.ics-lancamentos td.meta-lanc{background:#fff;font-weight:bold}
-.ics-lancamentos th.meta-lanc{background:#111;font-weight:bold}
+.ics-lancamentos td.meta-lanc{position:sticky;right:0;z-index:12;background:#fff;font-weight:bold}
+.ics-lancamentos th.meta-lanc{position:sticky;right:0;z-index:30;background:#111}
 .ics-info{
     background:#f5f6f8;border-radius:9px;padding:9px 11px;color:#555;
     font-size:12px;margin-top:10px;
@@ -789,8 +783,8 @@ body{
     .ics-tabela{font-size:8px}
     .ics-tabela th,.ics-tabela td{padding:4px 3px}
     .ics-tabela td.item-cell{min-width:150px;max-width:190px}
-    .ics-lancamentos td.datahora,.ics-lancamentos th.datahora{min-width:84px}
-    .ics-lancamentos td.sku,.ics-lancamentos th.sku{left:84px;min-width:48px}
+    .ics-lancamentos td.datahora,.ics-lancamentos th.datahora{min-width:105px}
+    .ics-lancamentos td.sku,.ics-lancamentos th.sku{left:105px;min-width:60px}
     .ics-lancamentos td.item{min-width:140px}
     .ics-lancamentos th,.ics-lancamentos td{font-size:8px;padding:3px 2px}
 }
@@ -843,7 +837,316 @@ body{
         <div class="card">
             <div class="titulo">Dados do Abate</div>
 
-            
+            <div class="campo">
+                <label for="cabecas">Quantidade de cabeças abatidas</label>
+                <input type="number" id="cabecas" placeholder="Ex.: 120000" min="0">
+            </div>
+
+            <div class="campo">
+                <label for="peso">Peso médio do frango (kg)</label>
+                <input type="number" id="peso" placeholder="Ex.: 2,850" min="0" step="0.001">
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="titulo">Selecione a Família</div>
+
+            <div class="familias">
+                <button class="familia" onclick="selecionarFamilia('Asa',this)">Asa</button>
+                <button class="familia" onclick="selecionarFamilia('Cabeça',this)">Cabeça</button>
+                <button class="familia" onclick="selecionarFamilia('Cartilagem',this)">Cartilagem</button>
+                <button class="familia" onclick="selecionarFamilia('CMS',this)">CMS</button>
+                <button class="familia" onclick="selecionarFamilia('Coração',this)">Coração</button>
+                <button class="familia" onclick="selecionarFamilia('Fígado',this)">Fígado</button>
+                <button class="familia" onclick="selecionarFamilia('Moela',this)">Moela</button>
+                <button class="familia" onclick="selecionarFamilia('Peito',this)">Peito</button>
+                <button class="familia" onclick="selecionarFamilia('Perna',this)">Perna</button>
+                <button class="familia" onclick="selecionarFamilia('Pé',this)">Pé</button>
+                <button class="familia" onclick="selecionarFamilia('Dorso',this)">Dorso</button>
+                <button class="familia" onclick="selecionarFamilia('Gordura',this)">Gordura</button>
+                <button class="familia" onclick="selecionarFamilia('Sassami',this)">Sassami</button>
+            </div>
+
+            <div class="familia-escolhida" id="familiaEscolhida">
+                Nenhuma família selecionada
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="titulo">Produção</div>
+
+            <div class="campo">
+                <label for="producao">Produção da família (kg)</label>
+                <input type="number" id="producao" placeholder="Ex.: 8500" min="0" step="0.001">
+            </div>
+
+            <div id="mensagemErro" class="erro"></div>
+
+            <button class="botao-calcular" onclick="calcular()">CALCULAR</button>
+        </div>
+
+        <div class="card resultado" id="resultado">
+            <div class="titulo">Resultado</div>
+
+            <div class="resultado-grid">
+                <div class="resultado-item">
+                    <div class="descricao">Família</div>
+                    <div class="valor" id="resultadoFamilia">-</div>
+                </div>
+
+                <div class="resultado-item">
+                    <div class="descricao">Volume de Abate</div>
+                    <div class="valor" id="resultadoAbate">-</div>
+                </div>
+
+                <div class="resultado-item">
+                    <div class="descricao">Produção</div>
+                    <div class="valor" id="resultadoProducao">-</div>
+                </div>
+
+                <div class="resultado-item">
+                    <div class="descricao">Rendimento / Balanço de Massa</div>
+                    <div class="valor" id="resultadoRendimento">-</div>
+                </div>
+
+                <div class="resultado-item">
+                    <div class="descricao">Meta</div>
+                    <div class="valor" id="resultadoMeta">-</div>
+                </div>
+
+                <div class="resultado-item resultado-destaque">
+                    <div class="descricao">B100</div>
+                    <div class="valor" id="resultadoB100">-</div>
+                </div>
+
+                <div class="resultado-item resultado-rs">
+                    <div class="descricao">R$/ton</div>
+                    <div class="valor" id="resultadoRsTon">-</div>
+                </div>
+
+                <div class="resultado-item">
+                    <div class="descricao">Perda de Produto</div>
+                    <div class="valor" id="resultadoPerdaProduto">-</div>
+                </div>
+
+                <div class="resultado-item resultado-perda">
+                    <div class="descricao">Perda em R$</div>
+                    <div class="valor" id="resultadoPerdaRs">-</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= ROL / MARGEM ================= -->
+    <section id="telaPrecos" class="view">
+
+        <button class="botao-voltar" onclick="mostrarTela('telaInicial')">← Voltar</button>
+
+        <div class="card">
+            <div class="titulo">ROL/kg Produto</div>
+
+            <div id="statusExcel" class="status"></div>
+
+            <div class="tipo-indicador">
+                <button id="btnROL" class="indicador-btn ativo" onclick="selecionarIndicador('rol')">
+                    ROL/kg
+                </button>
+                <button id="btnMargem" class="indicador-btn" onclick="selecionarIndicador('margem')">
+                    Margem (R$/kg)
+                </button>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="titulo">Selecione a Família</div>
+
+            <div class="familias" id="familiasPrecos"></div>
+
+            <div class="familia-escolhida" id="familiaPrecoEscolhida">
+                Nenhuma família selecionada
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="titulo">Filtros</div>
+
+            <div class="filtros-grid">
+
+                <div class="campo">
+                    <label for="mercadoSelect">Mercado</label>
+                    <select id="mercadoSelect" onchange="renderTabelaPrecos()">
+                        <option value="">Todos os mercados</option>
+                    </select>
+                </div>
+
+                <div class="campo">
+                    <label for="periodoSelect">Período</label>
+                    <select id="periodoSelect" onchange="alterarPeriodoSelect()">
+                        <option value="mes">Mês específico</option>
+                        <option value="trimestre">Último trimestre</option>
+                        <option value="3">Últimos 3 meses</option>
+                        <option value="6">Últimos 6 meses</option>
+                        <option value="12">Últimos 12 meses</option>
+                        <option value="personalizado">Personalizado</option>
+                    </select>
+                </div>
+
+                <div class="campo">
+                    <label for="mesSelect">Mês</label>
+                    <select id="mesSelect" onchange="renderTabelaPrecos()"></select>
+                </div>
+
+            </div>
+
+            <div id="periodoPersonalizado" class="periodo-personalizado">
+                <div class="campo">
+                    <label for="mesInicio">De</label>
+                    <select id="mesInicio" onchange="renderTabelaPrecos()"></select>
+                </div>
+
+                <div class="campo">
+                    <label for="mesFim">Até</label>
+                    <select id="mesFim" onchange="renderTabelaPrecos()"></select>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="info-precos">
+                <div class="info-item">
+                    <div class="label">Indicador</div>
+                    <div class="valor" id="infoIndicador">ROL/kg</div>
+                </div>
+
+                <div class="info-item">
+                    <div class="label">Último mês disponível</div>
+                    <div class="valor" id="infoUltimoMes">-</div>
+                </div>
+
+                <div class="info-item">
+                    <div class="label">Produtos exibidos</div>
+                    <div class="valor" id="infoProdutos">0</div>
+                </div>
+            </div>
+
+            <div class="tabela-wrapper">
+                <table class="tabela-precos" id="tabelaPrecos">
+                    <thead></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= IC ÁREA QUENTE ================= -->
+    <section id="telaICQuente" class="view">
+
+        <button class="botao-voltar" onclick="mostrarTela('telaInicial')">← Voltar</button>
+
+        <div class="card">
+            <div class="titulo">IC Área Quente</div>
+
+            <div id="statusICQuente" class="ic-status">
+                Aguardando carregamento da planilha...
+            </div>
+
+            <div class="campo">
+                <label>Período</label>
+                <div class="ic-filtros">
+                    <button id="icBtnMeses" class="ic-toggle ativo" onclick="selecionarPeriodoIC('meses')">MESES</button>
+                    <button id="icBtnDias" class="ic-toggle" onclick="selecionarPeriodoIC('dias')">DIAS</button>
+                </div>
+            </div>
+
+            <div class="campo">
+                <label>Área</label>
+                <div class="ic-categorias">
+                    <button id="icCatEscald" class="ic-cat ativo" onclick="alternarCategoriaIC('Escald')">Escaldagem</button>
+                    <button id="icCatEviscer" class="ic-cat ativo" onclick="alternarCategoriaIC('Eviscer')">Evisceração</button>
+                    <button id="icCatMiudos" class="ic-cat ativo" onclick="alternarCategoriaIC('Miúdos')">Miúdos</button>
+                    
+                </div>
+            </div>
+
+            <div class="ic-legenda">
+                <span class="ic-leg"><span class="ic-quadrado verde"></span> Faixa inferior</span>
+                <span class="ic-leg"><span class="ic-quadrado amarelo"></span> Faixa intermediária</span>
+                <span class="ic-leg"><span class="ic-quadrado vermelho"></span> Faixa superior</span>
+                <span>Vermelho na visualização diária = acima da meta.</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="ic-tabela-wrapper">
+                <table id="tabelaICQuente" class="ic-tabela">
+                    <thead></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+    </section>
+
+    <!-- ================= IC CORTES ================= -->
+    <section id="telaICCortes" class="view">
+        <button class="botao-voltar" onclick="mostrarTela('telaInicial')">← Voltar</button>
+
+        <div class="card">
+            <div class="titulo">IC Cortes</div>
+            <div id="statusICCortes" class="icc-status">Aguardando carregamento da planilha...</div>
+
+            <div class="campo">
+                <label>Período</label>
+                <div class="ic-filtros">
+                    <button id="iccBtnMeses" class="ic-toggle ativo" onclick="selecionarPeriodoICC('meses')">MESES</button>
+                    <button id="iccBtnDias" class="ic-toggle" onclick="selecionarPeriodoICC('dias')">DIAS</button>
+                </div>
+            </div>
+
+            <div class="campo">
+                <label>Família</label>
+                <div id="iccFamilias" class="icc-filtros"></div>
+            </div>
+
+            <div class="icc-legenda-cortes">
+                <span><span class="ic-quadrado verde"></span> Faixa inferior</span>
+                <span><span class="ic-quadrado amarelo"></span> Faixa intermediária</span>
+                <span><span class="ic-quadrado vermelho"></span> Faixa superior</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="icc-tabela-wrapper">
+                <table id="tabelaICCortes" class="icc-tabela">
+                    <thead></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    </section>
+
+    <!-- ================= IC SOBREPESO ================= -->
+    <section id="telaICSobrepeso" class="view">
+        <button class="botao-voltar" onclick="mostrarTela('telaInicial')">← Voltar</button>
+
+        <div class="card">
+            <div class="titulo">IC Sobrepeso</div>
+            <div id="statusICSobrepeso" class="ics-status">Aguardando carregamento da planilha...</div>
+
+            <div class="campo">
+                <label>Visualização</label>
+                <div class="ics-filtros">
+                    <button id="icsBtnMeses" class="ics-btn ativo" onclick="selecionarModoICS('meses')">MESES</button>
+                    <button id="icsBtnDias" class="ics-btn" onclick="selecionarModoICS('dias')">DIAS</button>
+                </div>
+            </div>
+
+            <div class="campo">
+                <label id="icsLabelMesesDias">Meses disponíveis</label>
+                <div id="icsMesesDias" class="ics-filtros"></div>
+            </div>
 
             <div class="campo">
                 <label>Turno</label>
@@ -853,633 +1156,6 @@ body{
             <div class="campo">
                 <label>Família</label>
                 <div id="icsFamilias" class="ics-filtros"></div>
-            </div>
-
-<div class="campo">
-                <label for="cabecas">Quantidade de cabeças abatidas</label>
-                <input type="number" id="cabecas" placeholder="Ex.: 120000" min="0">
-            </div>
-
-            <div class="campo">
-                <label for="peso">Peso médio do frango (kg)</label>
-                <input type="number" id="peso" placeholder="Ex.: 2,850" min="0" step="0.001">
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="titulo">Selecione a Família</div>
-
-            <div class="familias">
-                <button class="familia" onclick="selecionarFamilia('Asa',this)">Asa</button>
-                <button class="familia" onclick="selecionarFamilia('Cabeça',this)">Cabeça</button>
-                <button class="familia" onclick="selecionarFamilia('Cartilagem',this)">Cartilagem</button>
-                <button class="familia" onclick="selecionarFamilia('CMS',this)">CMS</button>
-                <button class="familia" onclick="selecionarFamilia('Coração',this)">Coração</button>
-                <button class="familia" onclick="selecionarFamilia('Fígado',this)">Fígado</button>
-                <button class="familia" onclick="selecionarFamilia('Moela',this)">Moela</button>
-                <button class="familia" onclick="selecionarFamilia('Peito',this)">Peito</button>
-                <button class="familia" onclick="selecionarFamilia('Perna',this)">Perna</button>
-                <button class="familia" onclick="selecionarFamilia('Pé',this)">Pé</button>
-                <button class="familia" onclick="selecionarFamilia('Dorso',this)">Dorso</button>
-                <button class="familia" onclick="selecionarFamilia('Gordura',this)">Gordura</button>
-                <button class="familia" onclick="selecionarFamilia('Sassami',this)">Sassami</button>
-            </div>
-
-            <div class="familia-escolhida" id="familiaEscolhida">
-                Nenhuma família selecionada
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="titulo">Produção</div>
-
-            <div class="campo">
-                <label for="producao">Produção da família (kg)</label>
-                <input type="number" id="producao" placeholder="Ex.: 8500" min="0" step="0.001">
-            </div>
-
-            <div id="mensagemErro" class="erro"></div>
-
-            <button class="botao-calcular" onclick="calcular()">CALCULAR</button>
-        </div>
-
-        <div class="card resultado" id="resultado">
-            <div class="titulo">Resultado</div>
-
-            <div class="resultado-grid">
-                <div class="resultado-item">
-                    <div class="descricao">Família</div>
-                    <div class="valor" id="resultadoFamilia">-</div>
-                </div>
-
-                <div class="resultado-item">
-                    <div class="descricao">Volume de Abate</div>
-                    <div class="valor" id="resultadoAbate">-</div>
-                </div>
-
-                <div class="resultado-item">
-                    <div class="descricao">Produção</div>
-                    <div class="valor" id="resultadoProducao">-</div>
-                </div>
-
-                <div class="resultado-item">
-                    <div class="descricao">Rendimento / Balanço de Massa</div>
-                    <div class="valor" id="resultadoRendimento">-</div>
-                </div>
-
-                <div class="resultado-item">
-                    <div class="descricao">Meta</div>
-                    <div class="valor" id="resultadoMeta">-</div>
-                </div>
-
-                <div class="resultado-item resultado-destaque">
-                    <div class="descricao">B100</div>
-                    <div class="valor" id="resultadoB100">-</div>
-                </div>
-
-                <div class="resultado-item resultado-rs">
-                    <div class="descricao">R$/ton</div>
-                    <div class="valor" id="resultadoRsTon">-</div>
-                </div>
-
-                <div class="resultado-item">
-                    <div class="descricao">Perda de Produto</div>
-                    <div class="valor" id="resultadoPerdaProduto">-</div>
-                </div>
-
-                <div class="resultado-item resultado-perda">
-                    <div class="descricao">Perda em R$</div>
-                    <div class="valor" id="resultadoPerdaRs">-</div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ================= ROL / MARGEM ================= -->
-    <section id="telaPrecos" class="view">
-
-        <button class="botao-voltar" onclick="mostrarTela('telaInicial')">← Voltar</button>
-
-        <div class="card">
-            <div class="titulo">ROL/kg Produto</div>
-
-            <div id="statusExcel" class="status"></div>
-
-            <div class="tipo-indicador">
-                <button id="btnROL" class="indicador-btn ativo" onclick="selecionarIndicador('rol')">
-                    ROL/kg
-                </button>
-                <button id="btnMargem" class="indicador-btn" onclick="selecionarIndicador('margem')">
-                    Margem (R$/kg)
-                </button>
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="titulo">Selecione a Família</div>
-
-            <div class="familias" id="familiasPrecos"></div>
-
-            <div class="familia-escolhida" id="familiaPrecoEscolhida">
-                Nenhuma família selecionada
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="titulo">Filtros</div>
-
-            <div class="filtros-grid">
-
-                <div class="campo">
-                    <label for="mercadoSelect">Mercado</label>
-                    <select id="mercadoSelect" onchange="renderTabelaPrecos()">
-                        <option value="">Todos os mercados</option>
-                    </select>
-                </div>
-
-                <div class="campo">
-                    <label for="periodoSelect">Período</label>
-                    <select id="periodoSelect" onchange="alterarPeriodoSelect()">
-                        <option value="mes">Mês específico</option>
-                        <option value="trimestre">Último trimestre</option>
-                        <option value="3">Últimos 3 meses</option>
-                        <option value="6">Últimos 6 meses</option>
-                        <option value="12">Últimos 12 meses</option>
-                        <option value="personalizado">Personalizado</option>
-                    </select>
-                </div>
-
-                <div class="campo">
-                    <label for="mesSelect">Mês</label>
-                    <select id="mesSelect" onchange="renderTabelaPrecos()"></select>
-                </div>
-
-            </div>
-
-            <div id="periodoPersonalizado" class="periodo-personalizado">
-                <div class="campo">
-                    <label for="mesInicio">De</label>
-                    <select id="mesInicio" onchange="renderTabelaPrecos()"></select>
-                </div>
-
-                <div class="campo">
-                    <label for="mesFim">Até</label>
-                    <select id="mesFim" onchange="renderTabelaPrecos()"></select>
-                </div>
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="info-precos">
-                <div class="info-item">
-                    <div class="label">Indicador</div>
-                    <div class="valor" id="infoIndicador">ROL/kg</div>
-                </div>
-
-                <div class="info-item">
-                    <div class="label">Último mês disponível</div>
-                    <div class="valor" id="infoUltimoMes">-</div>
-                </div>
-
-                <div class="info-item">
-                    <div class="label">Produtos exibidos</div>
-                    <div class="valor" id="infoProdutos">0</div>
-                </div>
-            </div>
-
-            <div class="tabela-wrapper">
-                <table class="tabela-precos" id="tabelaPrecos">
-                    <thead></thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-        </div>
-    </section>
-
-    <!-- ================= IC ÁREA QUENTE ================= -->
-    <section id="telaICQuente" class="view">
-
-        <button class="botao-voltar" onclick="mostrarTela('telaInicial')">← Voltar</button>
-
-        <div class="card">
-            <div class="titulo">IC Área Quente</div>
-
-            <div id="statusICQuente" class="ic-status">
-                Aguardando carregamento da planilha...
-            </div>
-
-            <div class="campo">
-                <label>Período</label>
-                <div class="ic-filtros">
-                    <button id="icBtnMeses" class="ic-toggle ativo" onclick="selecionarPeriodoIC('meses')">MESES</button>
-                    <button id="icBtnDias" class="ic-toggle" onclick="selecionarPeriodoIC('dias')">DIAS</button>
-                </div>
-            </div>
-
-            <div class="campo">
-                <label>Área</label>
-                <div class="ic-categorias">
-                    <button id="icCatEscald" class="ic-cat ativo" onclick="alternarCategoriaIC('Escald')">Escaldagem</button>
-                    <button id="icCatEviscer" class="ic-cat ativo" onclick="alternarCategoriaIC('Eviscer')">Evisceração</button>
-                    <button id="icCatMiudos" class="ic-cat ativo" onclick="alternarCategoriaIC('Miúdos')">Miúdos</button>
-                    
-                </div>
-            </div>
-
-            <div class="ic-legenda">
-                <span class="ic-leg"><span class="ic-quadrado verde"></span> Faixa inferior</span>
-                <span class="ic-leg"><span class="ic-quadrado amarelo"></span> Faixa intermediária</span>
-                <span class="ic-leg"><span class="ic-quadrado vermelho"></span> Faixa superior</span>
-                <span>Vermelho na visualização diária = acima da meta.</span>
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="ic-tabela-wrapper">
-                <table id="tabelaICQuente" class="ic-tabela">
-                    <thead></thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-        </div>
-
-    </section>
-
-    <!-- ================= IC CORTES ================= -->
-    <section id="telaICCortes" class="view">
-        <button class="botao-voltar" onclick="mostrarTela('telaInicial')">← Voltar</button>
-
-        <div class="card">
-            <div class="titulo">IC Cortes</div>
-            <div id="statusICCortes" class="icc-status">Aguardando carregamento da planilha...</div>
-
-            <div class="campo">
-                <label>Período</label>
-                <div class="ic-filtros">
-                    <button id="iccBtnMeses" class="ic-toggle ativo" onclick="selecionarPeriodoICC('meses')">MESES</button>
-                    <button id="iccBtnDias" class="ic-toggle" onclick="selecionarPeriodoICC('dias')">DIAS</button>
-                </div>
-            </div>
-
-            <div class="campo">
-                <label>Família</label>
-                <div id="iccFamilias" class="icc-filtros"></div>
-            </div>
-
-            <div class="icc-legenda-cortes">
-                <span><span class="ic-quadrado verde"></span> Faixa inferior</span>
-                <span><span class="ic-quadrado amarelo"></span> Faixa intermediária</span>
-                <span><span class="ic-quadrado vermelho"></span> Faixa superior</span>
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="icc-tabela-wrapper">
-                <table id="tabelaICCortes" class="icc-tabela">
-                    <thead></thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-        </div>
-    </section>
-
-    </section>
-
-    <!-- ================= IC SOBREPESO ================= -->
-    <section id="telaICSobrepeso" class="view">
-        <button class="botao-voltar" onclick="mostrarTela('telaInicial')">← Voltar</button>
-
-        <div class="card">
-            <div class="titulo">IC Sobrepeso</div>
-            <div id="statusICSobrepeso" class="ics-status">Aguardando carregamento da planilha...</div>
-
-            <div class="campo">
-                <label>Visualização</label>
-                <div class="ics-filtros">
-                    <button id="icsBtnMeses" class="ics-btn ativo" onclick="selecionarModoICS('meses')">MESES</button>
-                    <button id="icsBtnDias" class="ics-btn" onclick="selecionarModoICS('dias')">DIAS</button>
-                </div>
-            </div>
-
-            <div class="campo">
-                <label id="icsLabelMesesDias">Meses disponíveis</label>
-                <div id="icsMesesDias" class="ics-filtros"></div>
-            </div>
-
-<div class="campo">
-                <label for="cabecas">Quantidade de cabeças abatidas</label>
-                <input type="number" id="cabecas" placeholder="Ex.: 120000" min="0">
-            </div>
-
-            <div class="campo">
-                <label for="peso">Peso médio do frango (kg)</label>
-                <input type="number" id="peso" placeholder="Ex.: 2,850" min="0" step="0.001">
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="titulo">Selecione a Família</div>
-
-            <div class="familias">
-                <button class="familia" onclick="selecionarFamilia('Asa',this)">Asa</button>
-                <button class="familia" onclick="selecionarFamilia('Cabeça',this)">Cabeça</button>
-                <button class="familia" onclick="selecionarFamilia('Cartilagem',this)">Cartilagem</button>
-                <button class="familia" onclick="selecionarFamilia('CMS',this)">CMS</button>
-                <button class="familia" onclick="selecionarFamilia('Coração',this)">Coração</button>
-                <button class="familia" onclick="selecionarFamilia('Fígado',this)">Fígado</button>
-                <button class="familia" onclick="selecionarFamilia('Moela',this)">Moela</button>
-                <button class="familia" onclick="selecionarFamilia('Peito',this)">Peito</button>
-                <button class="familia" onclick="selecionarFamilia('Perna',this)">Perna</button>
-                <button class="familia" onclick="selecionarFamilia('Pé',this)">Pé</button>
-                <button class="familia" onclick="selecionarFamilia('Dorso',this)">Dorso</button>
-                <button class="familia" onclick="selecionarFamilia('Gordura',this)">Gordura</button>
-                <button class="familia" onclick="selecionarFamilia('Sassami',this)">Sassami</button>
-            </div>
-
-            <div class="familia-escolhida" id="familiaEscolhida">
-                Nenhuma família selecionada
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="titulo">Produção</div>
-
-            <div class="campo">
-                <label for="producao">Produção da família (kg)</label>
-                <input type="number" id="producao" placeholder="Ex.: 8500" min="0" step="0.001">
-            </div>
-
-            <div id="mensagemErro" class="erro"></div>
-
-            <button class="botao-calcular" onclick="calcular()">CALCULAR</button>
-        </div>
-
-        <div class="card resultado" id="resultado">
-            <div class="titulo">Resultado</div>
-
-            <div class="resultado-grid">
-                <div class="resultado-item">
-                    <div class="descricao">Família</div>
-                    <div class="valor" id="resultadoFamilia">-</div>
-                </div>
-
-                <div class="resultado-item">
-                    <div class="descricao">Volume de Abate</div>
-                    <div class="valor" id="resultadoAbate">-</div>
-                </div>
-
-                <div class="resultado-item">
-                    <div class="descricao">Produção</div>
-                    <div class="valor" id="resultadoProducao">-</div>
-                </div>
-
-                <div class="resultado-item">
-                    <div class="descricao">Rendimento / Balanço de Massa</div>
-                    <div class="valor" id="resultadoRendimento">-</div>
-                </div>
-
-                <div class="resultado-item">
-                    <div class="descricao">Meta</div>
-                    <div class="valor" id="resultadoMeta">-</div>
-                </div>
-
-                <div class="resultado-item resultado-destaque">
-                    <div class="descricao">B100</div>
-                    <div class="valor" id="resultadoB100">-</div>
-                </div>
-
-                <div class="resultado-item resultado-rs">
-                    <div class="descricao">R$/ton</div>
-                    <div class="valor" id="resultadoRsTon">-</div>
-                </div>
-
-                <div class="resultado-item">
-                    <div class="descricao">Perda de Produto</div>
-                    <div class="valor" id="resultadoPerdaProduto">-</div>
-                </div>
-
-                <div class="resultado-item resultado-perda">
-                    <div class="descricao">Perda em R$</div>
-                    <div class="valor" id="resultadoPerdaRs">-</div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ================= ROL / MARGEM ================= -->
-    <section id="telaPrecos" class="view">
-
-        <button class="botao-voltar" onclick="mostrarTela('telaInicial')">← Voltar</button>
-
-        <div class="card">
-            <div class="titulo">ROL/kg Produto</div>
-
-            <div id="statusExcel" class="status"></div>
-
-            <div class="tipo-indicador">
-                <button id="btnROL" class="indicador-btn ativo" onclick="selecionarIndicador('rol')">
-                    ROL/kg
-                </button>
-                <button id="btnMargem" class="indicador-btn" onclick="selecionarIndicador('margem')">
-                    Margem (R$/kg)
-                </button>
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="titulo">Selecione a Família</div>
-
-            <div class="familias" id="familiasPrecos"></div>
-
-            <div class="familia-escolhida" id="familiaPrecoEscolhida">
-                Nenhuma família selecionada
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="titulo">Filtros</div>
-
-            <div class="filtros-grid">
-
-                <div class="campo">
-                    <label for="mercadoSelect">Mercado</label>
-                    <select id="mercadoSelect" onchange="renderTabelaPrecos()">
-                        <option value="">Todos os mercados</option>
-                    </select>
-                </div>
-
-                <div class="campo">
-                    <label for="periodoSelect">Período</label>
-                    <select id="periodoSelect" onchange="alterarPeriodoSelect()">
-                        <option value="mes">Mês específico</option>
-                        <option value="trimestre">Último trimestre</option>
-                        <option value="3">Últimos 3 meses</option>
-                        <option value="6">Últimos 6 meses</option>
-                        <option value="12">Últimos 12 meses</option>
-                        <option value="personalizado">Personalizado</option>
-                    </select>
-                </div>
-
-                <div class="campo">
-                    <label for="mesSelect">Mês</label>
-                    <select id="mesSelect" onchange="renderTabelaPrecos()"></select>
-                </div>
-
-            </div>
-
-            <div id="periodoPersonalizado" class="periodo-personalizado">
-                <div class="campo">
-                    <label for="mesInicio">De</label>
-                    <select id="mesInicio" onchange="renderTabelaPrecos()"></select>
-                </div>
-
-                <div class="campo">
-                    <label for="mesFim">Até</label>
-                    <select id="mesFim" onchange="renderTabelaPrecos()"></select>
-                </div>
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="info-precos">
-                <div class="info-item">
-                    <div class="label">Indicador</div>
-                    <div class="valor" id="infoIndicador">ROL/kg</div>
-                </div>
-
-                <div class="info-item">
-                    <div class="label">Último mês disponível</div>
-                    <div class="valor" id="infoUltimoMes">-</div>
-                </div>
-
-                <div class="info-item">
-                    <div class="label">Produtos exibidos</div>
-                    <div class="valor" id="infoProdutos">0</div>
-                </div>
-            </div>
-
-            <div class="tabela-wrapper">
-                <table class="tabela-precos" id="tabelaPrecos">
-                    <thead></thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-        </div>
-    </section>
-
-    <!-- ================= IC ÁREA QUENTE ================= -->
-    <section id="telaICQuente" class="view">
-
-        <button class="botao-voltar" onclick="mostrarTela('telaInicial')">← Voltar</button>
-
-        <div class="card">
-            <div class="titulo">IC Área Quente</div>
-
-            <div id="statusICQuente" class="ic-status">
-                Aguardando carregamento da planilha...
-            </div>
-
-            <div class="campo">
-                <label>Período</label>
-                <div class="ic-filtros">
-                    <button id="icBtnMeses" class="ic-toggle ativo" onclick="selecionarPeriodoIC('meses')">MESES</button>
-                    <button id="icBtnDias" class="ic-toggle" onclick="selecionarPeriodoIC('dias')">DIAS</button>
-                </div>
-            </div>
-
-            <div class="campo">
-                <label>Área</label>
-                <div class="ic-categorias">
-                    <button id="icCatEscald" class="ic-cat ativo" onclick="alternarCategoriaIC('Escald')">Escaldagem</button>
-                    <button id="icCatEviscer" class="ic-cat ativo" onclick="alternarCategoriaIC('Eviscer')">Evisceração</button>
-                    <button id="icCatMiudos" class="ic-cat ativo" onclick="alternarCategoriaIC('Miúdos')">Miúdos</button>
-                    
-                </div>
-            </div>
-
-            <div class="ic-legenda">
-                <span class="ic-leg"><span class="ic-quadrado verde"></span> Faixa inferior</span>
-                <span class="ic-leg"><span class="ic-quadrado amarelo"></span> Faixa intermediária</span>
-                <span class="ic-leg"><span class="ic-quadrado vermelho"></span> Faixa superior</span>
-                <span>Vermelho na visualização diária = acima da meta.</span>
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="ic-tabela-wrapper">
-                <table id="tabelaICQuente" class="ic-tabela">
-                    <thead></thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-        </div>
-
-    </section>
-
-    <!-- ================= IC CORTES ================= -->
-    <section id="telaICCortes" class="view">
-        <button class="botao-voltar" onclick="mostrarTela('telaInicial')">← Voltar</button>
-
-        <div class="card">
-            <div class="titulo">IC Cortes</div>
-            <div id="statusICCortes" class="icc-status">Aguardando carregamento da planilha...</div>
-
-            <div class="campo">
-                <label>Período</label>
-                <div class="ic-filtros">
-                    <button id="iccBtnMeses" class="ic-toggle ativo" onclick="selecionarPeriodoICC('meses')">MESES</button>
-                    <button id="iccBtnDias" class="ic-toggle" onclick="selecionarPeriodoICC('dias')">DIAS</button>
-                </div>
-            </div>
-
-            <div class="campo">
-                <label>Família</label>
-                <div id="iccFamilias" class="icc-filtros"></div>
-            </div>
-
-            <div class="icc-legenda-cortes">
-                <span><span class="ic-quadrado verde"></span> Faixa inferior</span>
-                <span><span class="ic-quadrado amarelo"></span> Faixa intermediária</span>
-                <span><span class="ic-quadrado vermelho"></span> Faixa superior</span>
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="icc-tabela-wrapper">
-                <table id="tabelaICCortes" class="icc-tabela">
-                    <thead></thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-        </div>
-    </section>
-
-    </section>
-
-    <!-- ================= IC SOBREPESO ================= -->
-    <section id="telaICSobrepeso" class="view">
-        <button class="botao-voltar" onclick="mostrarTela('telaInicial')">← Voltar</button>
-
-        <div class="card">
-            <div class="titulo">IC Sobrepeso</div>
-            <div id="statusICSobrepeso" class="ics-status">Aguardando carregamento da planilha...</div>
-
-            <div class="campo">
-                <label>Visualização</label>
-                <div class="ics-filtros">
-                    <button id="icsBtnMeses" class="ics-btn ativo" onclick="selecionarModoICS('meses')">MESES</button>
-                    <button id="icsBtnDias" class="ics-btn" onclick="selecionarModoICS('dias')">DIAS</button>
-                </div>
-            </div>
-
-            <div class="campo">
-                <label id="icsLabelMesesDias">Meses disponíveis</label>
-                <div id="icsMesesDias" class="ics-filtros"></div>
-            </div>
-
-            <div class="campo">
-                <label>Turno</label>
-                <div id="icsTurnos" class="ics-filtros"></div>
             </div>
 
             <div class="ics-info">
@@ -2968,7 +2644,7 @@ function formatarValorICCortes(v,isPercent){
     const n=valorNumericoICCortes(v);
     if(n===null)return String(v??"");
     if(isPercent)return (n*100).toLocaleString("pt-BR",{maximumFractionDigits:0})+"%";
-    return formatarInteiroICS(n);
+    return n.toLocaleString("pt-BR",{minimumFractionDigits:1,maximumFractionDigits:1});
 }
 
 function aplicarEscalaICCortes(td,n,config){
@@ -3191,13 +2867,9 @@ function dataChaveICS(v){
     if(m)return `${m[3]}-${m[2]}-${m[1]}`;
     return "";
 }
-function formatarInteiroICS(v){
-    const n=valorNumICS(v);
-    return n===null?"—":Math.round(n).toLocaleString("pt-BR",{maximumFractionDigits:0});
-}
 function formatarGICS(v){
     const n=valorNumICS(v);
-    return n===null?"—":Math.round(n).toLocaleString("pt-BR",{maximumFractionDigits:0})+" g";
+    return n===null?"—":n.toLocaleString("pt-BR",{minimumFractionDigits:1,maximumFractionDigits:1})+" g";
 }
 function criarBotaoICS(texto,ativo,click){
     const b=document.createElement("button");
@@ -3369,7 +3041,7 @@ function renderICSobrepeso(){
         const trF=document.createElement("tr");
         const tdF=document.createElement("td");tdF.colSpan=2;tdF.className="familia-row";tdF.innerText=fam;
         trF.appendChild(tdF);
-        const tdVF=document.createElement("td");tdVF.className="familia-row meta-col";tdVF.style.textAlign="center";
+        const tdVF=document.createElement("td");tdVF.className="familia-row meta-col";
         tdVF.innerText=formatarGICS(mediaArrayICS([...itens.values()].flat()));
         trF.appendChild(tdVF);tbody.appendChild(trF);
 
@@ -3490,10 +3162,10 @@ function renderLancamentosICS(){
             if(c.key==="datahora")td.innerText=formatarDataHoraICS(r[c.col-1]);
             else if(c.key==="sku")td.innerText=textoICS(r[c.col-1]);
             else if(c.key==="item")td.innerText=textoICS(r[c.col-1]);
-            else if(c.key==="meta")td.innerText=meta===null?"—":formatarInteiroICS(meta);
+            else if(c.key==="meta")td.innerText=meta===null?"—":meta.toLocaleString("pt-BR",{maximumFractionDigits:1});
             else{
                 const n=valorNumICS(r[c.col-1]);
-                td.innerText=n===null?"—":formatarInteiroICS(n);
+                td.innerText=n===null?"—":n.toLocaleString("pt-BR",{minimumFractionDigits:1,maximumFractionDigits:1});
                 if(n!==null&&meta!==null&&n>meta+80)td.classList.add("peso-alto");
             }
             tr.appendChild(td);
@@ -3531,14 +3203,4 @@ async function iniciarICSobrepeso(){
 
 </script>
 </body>
-</html>linhas.sort((a,b)=>{
-        const ia=textoICS(a[icsCol.item-1]).localeCompare(textoICS(b[icsCol.item-1]),"pt-BR",{sensitivity:"base"});
-        if(ia!==0)return ia;
-        const da=a[icsCol.data-1],db=b[icsCol.data-1];
-        const ta=da instanceof Date?da.getTime():Date.parse(textoICS(da));
-        const tb=db instanceof Date?db.getTime():Date.parse(textoICS(db));
-        if(!Number.isNaN(ta)&&!Number.isNaN(tb))return ta-tb;
-        return textoICS(da).localeCompare(textoICS(db),"pt-BR");
-    });
-
-    
+</html>
