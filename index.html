@@ -755,8 +755,9 @@ body{
     position:sticky;top:0;z-index:20;background:#111;color:#fff;
     font-weight:bold;font-size:11px;
 }
+.ics-lancamentos thead th{font-size:8.8px;}
 .ics-tabela td.familia-row{
-    background:#333!important;color:#fff;font-weight:bold;text-align:left;
+    background:#333!important;color:#fff;font-weight:bold;text-align:center;
 }
 .ics-tabela td.item-cell{text-align:left;white-space:normal;min-width:280px}
 .ics-tabela td.sobrepeso-alto{background:#e30613!important;color:#fff!important;font-weight:bold}
@@ -765,16 +766,16 @@ body{
 }
 .ics-tabela th.meta-col{position:sticky;right:0;z-index:30;background:#111}
 .ics-lancamentos td.datahora,.ics-lancamentos th.datahora{
-    position:sticky;left:0;z-index:12;background:#fff;min-width:130px;
+    position:sticky;left:0;z-index:12;background:#fff;min-width:104px;
 }
 .ics-lancamentos td.sku,.ics-lancamentos th.sku{
-    position:sticky;left:130px;z-index:12;background:#fff;min-width:70px;
+    position:sticky;left:104px;z-index:12;background:#fff;min-width:56px;
 }
 .ics-lancamentos th.datahora,.ics-lancamentos th.sku{background:#111;z-index:30}
 .ics-lancamentos td.item{text-align:left;min-width:220px;white-space:normal}
 .ics-lancamentos td.peso-alto{background:#e30613!important;color:#fff!important;font-weight:bold}
-.ics-lancamentos td.meta-lanc{position:sticky;right:0;z-index:12;background:#fff;font-weight:bold}
-.ics-lancamentos th.meta-lanc{position:sticky;right:0;z-index:30;background:#111}
+.ics-lancamentos td.meta-lanc{font-weight:bold}
+.ics-lancamentos th.meta-lanc{background:#111}
 .ics-info{
     background:#f5f6f8;border-radius:9px;padding:9px 11px;color:#555;
     font-size:12px;margin-top:10px;
@@ -783,9 +784,9 @@ body{
     .ics-tabela{font-size:8px}
     .ics-tabela th,.ics-tabela td{padding:4px 3px}
     .ics-tabela td.item-cell{min-width:150px;max-width:190px}
-    .ics-lancamentos td.datahora,.ics-lancamentos th.datahora{min-width:105px}
-    .ics-lancamentos td.sku,.ics-lancamentos th.sku{left:105px;min-width:60px}
-    .ics-lancamentos td.item{min-width:140px}
+    .ics-lancamentos td.datahora,.ics-lancamentos th.datahora{min-width:84px}
+    .ics-lancamentos td.sku,.ics-lancamentos th.sku{left:84px;min-width:48px}
+    .ics-lancamentos td.item{min-width:220px}
     .ics-lancamentos th,.ics-lancamentos td{font-size:8px;padding:3px 2px}
 }
 
@@ -1144,11 +1145,6 @@ body{
             </div>
 
             <div class="campo">
-                <label id="icsLabelMesesDias">Meses disponíveis</label>
-                <div id="icsMesesDias" class="ics-filtros"></div>
-            </div>
-
-            <div class="campo">
                 <label>Turno</label>
                 <div id="icsTurnos" class="ics-filtros"></div>
             </div>
@@ -1156,6 +1152,11 @@ body{
             <div class="campo">
                 <label>Família</label>
                 <div id="icsFamilias" class="ics-filtros"></div>
+            </div>
+
+            <div class="campo">
+                <label id="icsLabelMesesDias">Meses disponíveis</label>
+                <div id="icsMesesDias" class="ics-filtros"></div>
             </div>
 
             <div class="ics-info">
@@ -2141,8 +2142,32 @@ function renderTabelaPrecos(){
                     if(dados[mes] !== undefined){
                         td.innerText=formatarMoeda(dados[mes]);
                     }else{
-                        td.innerText="—";
-                        td.classList.add("vazio");
+                        // Se não houver valor no mês selecionado, procura o mês anterior
+                        // mais próximo que tenha valor para o mesmo produto.
+                        const mesesIndicador=mesesAtuais();
+                        const idxMes=mesesIndicador.indexOf(mes);
+                        let mesAnterior="";
+                        let valorAnterior;
+
+                        if(idxMes>0){
+                            for(let i=idxMes-1;i>=0;i--){
+                                const candidato=mesesIndicador[i];
+                                if(dados[candidato] !== undefined && dados[candidato] !== null && dados[candidato] !== "" && !isNaN(Number(dados[candidato]))){
+                                    mesAnterior=candidato;
+                                    valorAnterior=dados[candidato];
+                                    break;
+                                }
+                            }
+                        }
+
+                        if(mesAnterior){
+                            td.innerText=formatarMoeda(valorAnterior);
+                            td.style.fontStyle="italic";
+                            td.title="Valor de "+mesAnterior+" — não há valor registrado para "+mes+".";
+                        }else{
+                            td.innerText="—";
+                            td.classList.add("vazio");
+                        }
                     }
 
                     tr.appendChild(td);
@@ -3117,6 +3142,21 @@ function formatarDataHoraICS(v){
     const d=new Date(s);
     return isNaN(d)?s:d.toLocaleString("pt-BR",{dateStyle:"short",timeStyle:"medium"});
 }
+function formatarInteiroICS(v){
+    const n=valorNumICS(v);
+    return n===null?"—":Math.round(n).toLocaleString("pt-BR",{maximumFractionDigits:0});
+}
+function timestampICS(v){
+    if(v instanceof Date)return v.getTime();
+    const s=textoICS(v);
+    if(!s)return Number.POSITIVE_INFINITY;
+    const m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
+    if(m){
+        return new Date(+m[3],+m[2]-1,+m[1],+(m[4]||0),+(m[5]||0),+(m[6]||0)).getTime();
+    }
+    const t=Date.parse(s);
+    return Number.isNaN(t)?Number.POSITIVE_INFINITY:t;
+}
 function renderLancamentosICS(){
     const tabela=document.getElementById("tabelaICSLancamentos");
     if(!tabela||!icsMatriz.length)return;
@@ -3154,6 +3194,14 @@ function renderLancamentosICS(){
         tr.appendChild(td);tbody.appendChild(tr);return;
     }
 
+    linhas.sort((a,b)=>{
+        const itemA=textoICS(a[icsCol.item-1]);
+        const itemB=textoICS(b[icsCol.item-1]);
+        const porItem=itemA.localeCompare(itemB,"pt-BR",{sensitivity:"base"});
+        if(porItem!==0)return porItem;
+        return timestampICS(a[icsCol.data-1])-timestampICS(b[icsCol.data-1]);
+    });
+
     linhas.forEach(r=>{
         const tr=document.createElement("tr");
         const meta=valorNumICS(r[icsCol.meta-1]);
@@ -3162,10 +3210,10 @@ function renderLancamentosICS(){
             if(c.key==="datahora")td.innerText=formatarDataHoraICS(r[c.col-1]);
             else if(c.key==="sku")td.innerText=textoICS(r[c.col-1]);
             else if(c.key==="item")td.innerText=textoICS(r[c.col-1]);
-            else if(c.key==="meta")td.innerText=meta===null?"—":meta.toLocaleString("pt-BR",{maximumFractionDigits:1});
+            else if(c.key==="meta")td.innerText=formatarInteiroICS(meta);
             else{
                 const n=valorNumICS(r[c.col-1]);
-                td.innerText=n===null?"—":n.toLocaleString("pt-BR",{minimumFractionDigits:1,maximumFractionDigits:1});
+                td.innerText=formatarInteiroICS(n);
                 if(n!==null&&meta!==null&&n>meta+80)td.classList.add("peso-alto");
             }
             tr.appendChild(td);
