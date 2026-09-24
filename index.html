@@ -2894,7 +2894,7 @@ function dataChaveICS(v){
 }
 function formatarGICS(v){
     const n=valorNumICS(v);
-    return n===null?"—":n.toLocaleString("pt-BR",{minimumFractionDigits:1,maximumFractionDigits:1})+" g";
+    return n===null?"—":Math.round(n).toLocaleString("pt-BR",{maximumFractionDigits:0})+" g";
 }
 function criarBotaoICS(texto,ativo,click){
     const b=document.createElement("button");
