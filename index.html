@@ -10,7 +10,6 @@
 
 
 </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.mjs" type="module"></script>
 
 <style>
 *{box-sizing:border-box;margin:0;padding:0;font-family:Arial,Helvetica,sans-serif}
@@ -799,7 +798,7 @@ body{
     .ics-lancamentos th,.ics-lancamentos td{font-size:8px;padding:3px 2px}
 }
 
-.menu-inicial-6{grid-template-columns:repeat(3,1fr)}.menu-btn.ptp{background:#111}.ptp-status{padding:11px;border-radius:8px;background:#f5f6f8;font-weight:bold;margin-bottom:14px}.ptp-lista{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.ptp-item{border:2px solid #ddd;background:#fff;border-radius:10px;padding:13px;text-align:left;font-weight:bold}.ptp-item.ativo{background:#e30613;color:#fff}.ptp-visualizador{display:none}.ptp-visualizador.mostrar{display:block}.ptp-paginas{display:flex;flex-direction:column;gap:18px}.ptp-pagina{text-align:center}.ptp-pagina canvas{display:block;max-width:100%;height:auto;margin:auto;background:#fff}.ptp-numero{font-size:12px;margin:7px}@media(max-width:650px){.menu-inicial-6,.ptp-lista{grid-template-columns:1fr}}</style>
+</style>
 </head>
 
 <body>
@@ -815,7 +814,7 @@ body{
         <div class="card">
             <div class="titulo">Selecione uma opção</div>
 
-            <div class="menu-inicial menu-inicial-6">
+            <div class="menu-inicial menu-inicial-5">
                 <button class="menu-btn" onclick="mostrarTela('telaCalculadora')">
                     🧮<br><br>CALCULADORA
                 </button>
@@ -835,12 +834,10 @@ body{
                 <button class="menu-btn sobrepeso" onclick="mostrarTela('telaICSobrepeso'); iniciarICSobrepeso();">
                     ⚖️<br><br>IC SOBREPESO
                 </button>
-                <button class="menu-btn ptp" onclick="mostrarTela('telaPTP'); iniciarPTP();">📋<br><br>PTP</button>
             </div>
         </div>
     </section>
 
-    <section id="telaPTP" class="view"><button class="botao-voltar" onclick="mostrarTela('telaInicial')">← Voltar</button><div class="card"><div class="titulo">PTP</div><div id="statusPTP" class="ptp-status">Aguardando...</div><div id="listaPTP" class="ptp-lista"></div></div><div id="visualizadorPTP" class="card ptp-visualizador"><div class="titulo">Visualização do PTP</div><div id="tituloPTP"></div><div id="paginasPTP" class="ptp-paginas"></div></div></section>
     <!-- ================= CALCULADORA ================= -->
     <section id="telaCalculadora" class="view">
 
@@ -2671,9 +2668,18 @@ function valorNumericoICCortes(v){
 }
 
 function ehPercentICCortes(row){
-    // No IC CORTES, todo indicador percentual tem o nome do ITEM iniciado por "%".
-    // A coluna E (índice 4) é o ITEM.
-    const item=String(row?.[4]??"").trim();
+    // A coluna E (índice 4) contém o nome do ITEM somente na primeira linha
+    // quando a célula está mesclada no Excel. Por isso, Turno 2 e Unidade
+    // podem vir com a célula vazia. Recupera o nome do item pela linha atual
+    // ou pelas linhas anteriores do mesmo bloco.
+    let item=String(row?.[4]??"").trim();
+    if(!item){
+        const indice=icCortesMatriz.indexOf(row);
+        for(let i=indice-1;i>=3;i--){
+            const anterior=String(icCortesMatriz[i]?.[4]??"").trim();
+            if(anterior){item=anterior;break;}
+        }
+    }
     return item.startsWith("%");
 }
 
@@ -3308,5 +3314,5 @@ async function iniciarICSobrepeso(){
 }
 
 </script>
-<script type="module">const R="hpferraz/calculadora-rendimento",B="PTP-e-ITC",API=`https://api.github.com/repos/${R}/git/trees/${encodeURIComponent(B)}?recursive=1`,RAW=`https://raw.githubusercontent.com/${R}/${encodeURIComponent(B)}/`;let loaded=false,L=null;async function lib(){if(L)return L;L=await import("https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.mjs");L.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.mjs";return L}function st(t){document.getElementById("statusPTP").innerText=t}function nome(p){return p.split("/").pop().replace(/\.pdf$/i,"").replace(/_/g," ")}window.iniciarPTP=async()=>{if(loaded)return;try{st("Carregando PTPs...");let r=await fetch(API),j=await r.json(),a=(j.tree||[]).filter(x=>x.type==="blob"&&/(^|\/)PTP[^/]*\.pdf$/i.test(x.path)).sort((a,b)=>a.path.localeCompare(b.path,"pt-BR",{numeric:true})),box=document.getElementById("listaPTP");box.innerHTML="";a.forEach(x=>{let b=document.createElement("button");b.className="ptp-item";b.innerText=nome(x.path);b.onclick=()=>abrir(x.path,b);box.appendChild(b)});loaded=true;st(a.length+" PTP(s) encontrado(s). Selecione um documento.")}catch(e){st("Erro: "+e.message)}};async function abrir(path,btn){document.querySelectorAll(".ptp-item").forEach(x=>x.classList.remove("ativo"));btn.classList.add("ativo");let v=document.getElementById("visualizadorPTP"),out=document.getElementById("paginasPTP");v.classList.add("mostrar");document.getElementById("tituloPTP").innerText=nome(path);out.innerHTML="Carregando PDF em alta resolução...";let P=await(await lib()).getDocument({url:RAW+path.split("/").map(encodeURIComponent).join("/")}).promise;out.innerHTML="";let w=Math.max(280,Math.min(document.querySelector(".container").clientWidth-70,1050)),m=Number(navigator.deviceMemory||4),q=m>=8?4:m>=4?3.25:2.5,cap=m>=8?28000000:m>=4?20000000:14000000;for(let n=1;n<=P.numPages;n++){let pg=await P.getPage(n),base=pg.getViewport({scale:1}),vp=pg.getViewport({scale:Math.max(.5,Math.min(2,w/base.width))}),mult=Math.max(devicePixelRatio||1,2)*q,px=vp.width*vp.height*mult*mult;if(px>cap)mult*=Math.sqrt(cap/px);mult=Math.max(2,Math.min(mult,6));let d=document.createElement("div"),lab=document.createElement("div"),c=document.createElement("canvas");d.className="ptp-pagina";lab.className="ptp-numero";lab.innerText=`Página ${n} de ${P.numPages}`;c.width=Math.floor(vp.width*mult);c.height=Math.floor(vp.height*mult);c.style.width=Math.floor(vp.width)+"px";c.style.height=Math.floor(vp.height)+"px";d.append(lab,c);out.appendChild(d);let ctx=c.getContext("2d",{alpha:false});ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality="high";await pg.render({canvasContext:ctx,viewport:vp,transform:[mult,0,0,mult,0,0]}).promise;await new Promise(r=>setTimeout(r,0))}}</script></body>
+</body>
 </html>
