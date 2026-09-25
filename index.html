@@ -759,8 +759,14 @@ body{
 .ics-tabela td.familia-row{
     background:#333!important;color:#fff;font-weight:bold;text-align:center;
 }
-.ics-tabela td.item-cell{text-align:left;white-space:normal;min-width:280px}
+.ics-tabela td.item-cell{text-align:left;white-space:normal;min-width:220px}
 .ics-tabela td.sobrepeso-alto{background:#e30613!important;color:#fff!important;font-weight:bold}
+.ics-tabela th.periodo-sobrepeso,.ics-tabela td.periodo-sobrepeso{
+    min-width:58px;max-width:72px;width:64px;padding-left:3px;padding-right:3px;
+}
+.ics-tabela th.item-cabecalho-sobrepeso{
+    min-width:220px;text-align:left;
+}
 .ics-tabela td.meta-col{
     position:sticky;right:0;z-index:10;background:#fff;font-weight:bold;
 }
@@ -784,6 +790,8 @@ body{
     .ics-tabela{font-size:8px}
     .ics-tabela th,.ics-tabela td{padding:4px 3px}
     .ics-tabela td.item-cell{min-width:150px;max-width:190px}
+    .ics-tabela th.periodo-sobrepeso,.ics-tabela td.periodo-sobrepeso{min-width:52px;max-width:62px;width:56px;padding-left:2px;padding-right:2px}
+    .ics-tabela th.item-cabecalho-sobrepeso{min-width:150px}
     .ics-lancamentos td.datahora,.ics-lancamentos th.datahora{min-width:84px}
     .ics-lancamentos td.sku,.ics-lancamentos th.sku{left:84px;min-width:48px}
     .ics-lancamentos td.item{min-width:220px}
@@ -2660,15 +2668,21 @@ function valorNumericoICCortes(v){
 }
 
 function ehPercentICCortes(row){
-    // Na planilha, os indicadores percentuais têm a meta armazenada como 0.x.
-    const meta=valorNumericoICCortes(row[18]);
-    return meta!==null && meta<1;
+    // No IC CORTES, todo indicador percentual tem o nome do ITEM iniciado por "%".
+    // A coluna E (índice 4) é o ITEM.
+    const item=String(row?.[4]??"").trim();
+    return item.startsWith("%");
 }
 
 function formatarValorICCortes(v,isPercent){
     const n=valorNumericoICCortes(v);
     if(n===null)return String(v??"");
-    if(isPercent)return (n*100).toLocaleString("pt-BR",{maximumFractionDigits:0})+"%";
+    if(isPercent){
+        // Os percentuais normalmente vêm como 0.xx. Se algum valor já vier
+        // como 96, por exemplo, não multiplicamos novamente por 100.
+        const percentual=Math.abs(n)<=1 ? n*100 : n;
+        return percentual.toLocaleString("pt-BR",{maximumFractionDigits:0})+"%";
+    }
     return n.toLocaleString("pt-BR",{minimumFractionDigits:1,maximumFractionDigits:1});
 }
 
@@ -2843,6 +2857,7 @@ let icsModo="meses";
 let icsTurnos=new Set(["Turno 1","Turno 2"]);
 let icsFamilias=new Set();
 let icsMesSelecionado="";
+let icsMesesSelecionados=new Set();
 let icsDiasSelecionados=new Set();
 let icsFamiliasDisponiveis=[];
 let icsMesesDisponiveis=[];
@@ -2916,6 +2931,13 @@ function construirFiltrosICS(){
     icsFamiliasDisponiveis=[...new Set(linhas.map(r=>textoICS(r[icsCol.familia-1])).filter(Boolean))];
     icsMesesDisponiveis=icsMesesOrdem.filter(m=>linhas.some(r=>normalizarMesICS(r[icsCol.mes-1])===m));
 
+    // No modo MESES, todos os meses disponíveis começam selecionados,
+    // mas agora cada botão pode ser ligado/desligado individualmente.
+    if(icsMesesSelecionados.size===0)icsMesesDisponiveis.forEach(m=>icsMesesSelecionados.add(m));
+    else{
+        [...icsMesesSelecionados].forEach(m=>{if(!icsMesesDisponiveis.includes(m))icsMesesSelecionados.delete(m);});
+    }
+
     if(icsFamilias.size===0)icsFamiliasDisponiveis.forEach(f=>icsFamilias.add(f));
 
     renderFiltrosTurnosICS();
@@ -2970,11 +2992,16 @@ function renderFiltrosMesesDiasICS(){
     const box=document.getElementById("icsMesesDias"),label=document.getElementById("icsLabelMesesDias");
     if(!box)return;
     box.innerHTML="";
+
     if(icsModo==="meses"){
         label.innerText="Meses disponíveis";
+        if(icsMesesSelecionados.size===0 && icsMesesDisponiveis.length){
+            icsMesesDisponiveis.forEach(m=>icsMesesSelecionados.add(m));
+        }
         icsMesesDisponiveis.forEach(m=>{
-            const b=criarBotaoICS(m,true,()=>{});
-            b.disabled=true;b.style.opacity=".75";
+            const b=criarBotaoICS(m,icsMesesSelecionados.has(m),()=>{
+                alternarSetICS(icsMesesSelecionados,m,b,renderICSobrepeso);
+            });
             box.appendChild(b);
         });
         return;
@@ -3020,8 +3047,8 @@ function linhasFiltradasICS(){
         const turno=normalizarTurnoICS(r[icsCol.turno-1]);
         const familia=textoICS(r[icsCol.familia-1]);
         if(!icsTurnos.has(turno)||!icsFamilias.has(familia))return false;
-        if(icsModo==="meses")return true;
-        if(!icsMesSelecionado||normalizarMesICS(r[icsCol.mes-1])!==icsMesSelecionado)return false;
+        if(icsModo==="meses")return icsMesesSelecionados.has(normalizarMesICS(r[icsCol.mes-1]));
+        if(!icsMesSelecionado||normalizarMes(r[icsCol.mes-1])!==icsMesSelecionado)return false;
         if(icsDiasSelecionados.size===0)return false;
         return icsDiasSelecionados.has(dataChaveICS(r[icsCol.data-1]));
     });
@@ -3036,48 +3063,76 @@ function renderICSobrepeso(){
     const thead=tabela.querySelector("thead"),tbody=tabela.querySelector("tbody");
     thead.innerHTML="";tbody.innerHTML="";
 
+    const periodos=icsModo==="meses"
+        ? icsMesesDisponiveis.filter(m=>icsMesesSelecionados.has(m))
+        : [...icsDiasSelecionados].sort();
+
     const hr=document.createElement("tr");
-    ["FAMÍLIA","ITEM","SOBREPESO (g)"].forEach((h,i)=>{
-        const th=document.createElement("th");th.innerText=h;
-        if(i===2)th.classList.add("meta-col");
+    const thItem=document.createElement("th");
+    thItem.innerText="ITEM";
+    thItem.className="item-cabecalho-sobrepeso";
+    hr.appendChild(thItem);
+    periodos.forEach(p=>{
+        const th=document.createElement("th");
+        th.className="periodo-sobrepeso";
+        th.innerText=icsModo==="meses" ? p : p.slice(8,10)+"/"+p.slice(5,7);
         hr.appendChild(th);
     });
     thead.appendChild(hr);
 
     const linhas=linhasFiltradasICS();
-    if(!linhas.length){
+    if(!linhas.length||!periodos.length){
         const tr=document.createElement("tr"),td=document.createElement("td");
-        td.colSpan=3;td.className="nenhum";
-        td.innerText=icsModo==="dias"?"Selecione um ou mais dias para visualizar os dados.":"Nenhum lançamento encontrado para os filtros selecionados.";
+        td.colSpan=Math.max(1,periodos.length+1);td.className="nenhum";
+        td.innerText=icsModo==="dias"
+            ? "Selecione um ou mais dias para visualizar os dados."
+            : "Selecione um ou mais meses para visualizar os dados.";
         tr.appendChild(td);tbody.appendChild(tr);return;
     }
 
-    const porFamilia=new Map();
+    // Família -> Item -> Período -> lançamentos de sobrepeso.
+    const dados=new Map();
     linhas.forEach(r=>{
-        const fam=textoICS(r[icsCol.familia-1]),item=textoICS(r[icsCol.item-1]);
+        const fam=textoICS(r[icsCol.familia-1]);
+        const item=textoICS(r[icsCol.item-1]);
         const n=valorNumICS(r[icsCol.sobrepeso-1]);
         if(!fam||!item||n===null)return;
-        if(!porFamilia.has(fam))porFamilia.set(fam,new Map());
-        if(!porFamilia.get(fam).has(item))porFamilia.get(fam).set(item,[]);
-        porFamilia.get(fam).get(item).push(n);
+        const periodo=icsModo==="meses"
+            ? normalizarMesICS(r[icsCol.mes-1])
+            : dataChaveICS(r[icsCol.data-1]);
+        if(!periodo||!periodos.includes(periodo))return;
+        if(!dados.has(fam))dados.set(fam,new Map());
+        if(!dados.get(fam).has(item))dados.get(fam).set(item,new Map());
+        const mapaItem=dados.get(fam).get(item);
+        if(!mapaItem.has(periodo))mapaItem.set(periodo,[]);
+        mapaItem.get(periodo).push(n);
     });
 
-    for(const [fam,itens] of porFamilia){
+    for(const [fam,itens] of dados){
         const trF=document.createElement("tr");
-        const tdF=document.createElement("td");tdF.colSpan=2;tdF.className="familia-row";tdF.innerText=fam;
+        const tdF=document.createElement("td");
+        tdF.colSpan=periodos.length+1;
+        tdF.className="familia-row";
+        tdF.innerText=fam;
         trF.appendChild(tdF);
-        const tdVF=document.createElement("td");tdVF.className="familia-row meta-col";
-        tdVF.innerText=formatarGICS(mediaArrayICS([...itens.values()].flat()));
-        trF.appendChild(tdVF);tbody.appendChild(trF);
+        tbody.appendChild(trF);
 
-        for(const [item,vals] of itens){
+        for(const [item,porPeriodo] of itens){
             const tr=document.createElement("tr");
-            const tdFam=document.createElement("td");tdFam.innerText=fam;tdFam.style.textAlign="left";tr.appendChild(tdFam);
-            const tdItem=document.createElement("td");tdItem.innerText=item;tdItem.className="item-cell";tr.appendChild(tdItem);
-            const tdVal=document.createElement("td");tdVal.className="meta-col";
-            const med=mediaArrayICS(vals);tdVal.innerText=formatarGICS(med);
-            if(med!==null&&med>20)tdVal.classList.add("sobrepeso-alto");
-            tr.appendChild(tdVal);tbody.appendChild(tr);
+            const tdItem=document.createElement("td");
+            tdItem.innerText=item;
+            tdItem.className="item-cell";
+            tr.appendChild(tdItem);
+
+            periodos.forEach(periodo=>{
+                const tdVal=document.createElement("td");
+                tdVal.className="periodo-sobrepeso";
+                const med=mediaArrayICS(porPeriodo.get(periodo)||[]);
+                tdVal.innerText=formatarGICS(med);
+                if(med!==null&&med>20)tdVal.classList.add("sobrepeso-alto");
+                tr.appendChild(tdVal);
+            });
+            tbody.appendChild(tr);
         }
     }
 }
