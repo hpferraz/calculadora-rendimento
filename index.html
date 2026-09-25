@@ -10,7 +10,6 @@
 
 
 </script>
-<!-- Visualizador de PDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.mjs" type="module"></script>
 
 <style>
@@ -800,23 +799,7 @@ body{
     .ics-lancamentos th,.ics-lancamentos td{font-size:8px;padding:3px 2px}
 }
 
-
-/* PTP */
-.menu-inicial-6{grid-template-columns:repeat(3,1fr)}
-.menu-btn.ptp{background:#111;color:#fff}.menu-btn.ptp:hover{background:#000}
-.ptp-status{padding:11px 13px;border-radius:8px;background:#f5f6f8;color:#555;font-size:13px;font-weight:bold;margin-bottom:14px}
-.ptp-lista{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-.ptp-item{border:2px solid #ddd;background:#fff;color:#333;border-radius:10px;padding:13px 14px;cursor:pointer;text-align:left;font-weight:bold;line-height:1.35;transition:.2s;overflow-wrap:anywhere}
-.ptp-item:hover{border-color:#e30613;color:#e30613}.ptp-item.ativo{background:#e30613;border-color:#e30613;color:#fff}
-.ptp-visualizador{display:none}.ptp-visualizador.mostrar{display:block}
-.ptp-documento-titulo{font-size:15px;font-weight:bold;color:#444;margin-bottom:12px;overflow-wrap:anywhere}
-.ptp-paginas{display:flex;flex-direction:column;gap:18px;align-items:center}
-.ptp-pagina{width:100%;background:#e9ebee;border:1px solid #ddd;border-radius:10px;padding:10px;text-align:center}
-.ptp-pagina canvas{display:block;max-width:100%;height:auto;margin:auto;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.12)}
-.ptp-numero{font-size:12px;color:#666;font-weight:bold;margin-bottom:7px}
-@media(max-width:800px){.menu-inicial-6{grid-template-columns:1fr 1fr}.ptp-lista{grid-template-columns:1fr}}
-@media(max-width:650px){.menu-inicial-6{grid-template-columns:1fr}.ptp-pagina{padding:5px}}
-</style>
+.menu-inicial-6{grid-template-columns:repeat(3,1fr)}.menu-btn.ptp{background:#111}.ptp-status{padding:11px;border-radius:8px;background:#f5f6f8;font-weight:bold;margin-bottom:14px}.ptp-lista{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.ptp-item{border:2px solid #ddd;background:#fff;border-radius:10px;padding:13px;text-align:left;font-weight:bold}.ptp-item.ativo{background:#e30613;color:#fff}.ptp-visualizador{display:none}.ptp-visualizador.mostrar{display:block}.ptp-paginas{display:flex;flex-direction:column;gap:18px}.ptp-pagina{text-align:center}.ptp-pagina canvas{display:block;max-width:100%;height:auto;margin:auto;background:#fff}.ptp-numero{font-size:12px;margin:7px}@media(max-width:650px){.menu-inicial-6,.ptp-lista{grid-template-columns:1fr}}</style>
 </head>
 
 <body>
@@ -852,20 +835,12 @@ body{
                 <button class="menu-btn sobrepeso" onclick="mostrarTela('telaICSobrepeso'); iniciarICSobrepeso();">
                     ⚖️<br><br>IC SOBREPESO
                 </button>
-                <button class="menu-btn ptp" onclick="mostrarTela('telaPTP'); iniciarPTP();">
-                    📋<br><br>PTP
-                </button>
+                <button class="menu-btn ptp" onclick="mostrarTela('telaPTP'); iniciarPTP();">📋<br><br>PTP</button>
             </div>
         </div>
     </section>
 
-    <!-- ================= PTP ================= -->
-    <section id="telaPTP" class="view">
-        <button class="botao-voltar" onclick="mostrarTela('telaInicial')">← Voltar</button>
-        <div class="card"><div class="titulo">PTP</div><div id="statusPTP" class="ptp-status">Aguardando carregamento dos PTPs...</div><div id="listaPTP" class="ptp-lista"></div></div>
-        <div id="visualizadorPTP" class="card ptp-visualizador"><div class="titulo">Visualização do PTP</div><div id="tituloPTP" class="ptp-documento-titulo"></div><div id="paginasPTP" class="ptp-paginas"></div></div>
-    </section>
-
+    <section id="telaPTP" class="view"><button class="botao-voltar" onclick="mostrarTela('telaInicial')">← Voltar</button><div class="card"><div class="titulo">PTP</div><div id="statusPTP" class="ptp-status">Aguardando...</div><div id="listaPTP" class="ptp-lista"></div></div><div id="visualizadorPTP" class="card ptp-visualizador"><div class="titulo">Visualização do PTP</div><div id="tituloPTP"></div><div id="paginasPTP" class="ptp-paginas"></div></div></section>
     <!-- ================= CALCULADORA ================= -->
     <section id="telaCalculadora" class="view">
 
@@ -3333,16 +3308,5 @@ async function iniciarICSobrepeso(){
 }
 
 </script>
-<script type="module">
-const PTP_REPOSITORIO="hpferraz/calculadora-rendimento",PTP_BRANCH="PTP-e-ITC";
-const PTP_API=`https://api.github.com/repos/${PTP_REPOSITORIO}/git/trees/${encodeURIComponent(PTP_BRANCH)}?recursive=1`;
-const PTP_RAW_BASE=`https://raw.githubusercontent.com/${PTP_REPOSITORIO}/${encodeURIComponent(PTP_BRANCH)}/`;
-let ptpCarregado=false,pdfjsLib=null;
-async function obterPdfJs(){if(pdfjsLib)return pdfjsLib;pdfjsLib=await import("https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.mjs");pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.mjs";return pdfjsLib;}
-function statusPTP(texto,tipo=""){const el=document.getElementById("statusPTP");if(!el)return;el.innerText=texto;el.style.background=tipo==="erro"?"#ffe5e5":tipo==="sucesso"?"#e9f8ee":"#f5f6f8";el.style.color=tipo==="erro"?"#b00000":tipo==="sucesso"?"#176b35":"#555";}
-function nomeAmigavelPTP(caminho){return caminho.split("/").pop().replace(/\.pdf$/i,"").replace(/_/g," ");}
-window.iniciarPTP=async function(){if(ptpCarregado)return;const lista=document.getElementById("listaPTP");if(!lista)return;statusPTP("Carregando lista de PTPs da branch PTP-e-ITC...");lista.innerHTML="";try{const resposta=await fetch(PTP_API,{headers:{Accept:"application/vnd.github+json"}});if(!resposta.ok)throw new Error("GitHub respondeu HTTP "+resposta.status);const dados=await resposta.json();const arquivos=(dados.tree||[]).filter(x=>x.type==="blob"&&/(^|\/)PTP[^/]*\.pdf$/i.test(x.path)).sort((a,b)=>a.path.localeCompare(b.path,"pt-BR",{numeric:true,sensitivity:"base"}));if(!arquivos.length)throw new Error('nenhum PDF iniciado por "PTP" foi encontrado na branch');arquivos.forEach(arquivo=>{const btn=document.createElement("button");btn.className="ptp-item";btn.innerText=nomeAmigavelPTP(arquivo.path);btn.title=arquivo.path;btn.onclick=()=>abrirPTP(arquivo.path,btn);lista.appendChild(btn);});ptpCarregado=true;statusPTP(arquivos.length+" PTP(s) encontrado(s). Selecione um documento para visualizar.","sucesso");}catch(e){console.error(e);statusPTP("Erro ao carregar os PTPs: "+e.message+".","erro");}};
-async function abrirPTP(caminho,botao){document.querySelectorAll(".ptp-item").forEach(b=>b.classList.remove("ativo"));if(botao)botao.classList.add("ativo");const visualizador=document.getElementById("visualizadorPTP"),paginas=document.getElementById("paginasPTP"),titulo=document.getElementById("tituloPTP");visualizador.classList.add("mostrar");titulo.innerText=nomeAmigavelPTP(caminho);paginas.innerHTML='<div class="ptp-status">Carregando PDF...</div>';visualizador.scrollIntoView({behavior:"smooth",block:"start"});try{const lib=await obterPdfJs(),url=PTP_RAW_BASE+caminho.split("/").map(encodeURIComponent).join("/"),pdf=await lib.getDocument({url}).promise;paginas.innerHTML="";for(let n=1;n<=pdf.numPages;n++){const pagina=await pdf.getPage(n),base=pagina.getViewport({scale:1}),largura=Math.max(280,Math.min(document.querySelector(".container").clientWidth-70,1050)),scale=Math.max(.5,Math.min(2,largura/base.width)),viewport=pagina.getViewport({scale}),box=document.createElement("div"),numero=document.createElement("div"),canvas=document.createElement("canvas"),dpr=Math.min(window.devicePixelRatio||1,2);box.className="ptp-pagina";numero.className="ptp-numero";numero.innerText=`Página ${n} de ${pdf.numPages}`;canvas.width=Math.floor(viewport.width*dpr);canvas.height=Math.floor(viewport.height*dpr);canvas.style.width=Math.floor(viewport.width)+"px";canvas.style.height=Math.floor(viewport.height)+"px";box.append(numero,canvas);paginas.appendChild(box);await pagina.render({canvasContext:canvas.getContext("2d"),viewport,transform:dpr!==1?[dpr,0,0,dpr,0,0]:null}).promise;}}catch(e){console.error(e);paginas.innerHTML='<div class="ptp-status" style="background:#ffe5e5;color:#b00000">Erro ao exibir o PDF: '+String(e.message||e)+'</div>';}}
-</script>
-</body>
+<script type="module">const R="hpferraz/calculadora-rendimento",B="PTP-e-ITC",API=`https://api.github.com/repos/${R}/git/trees/${encodeURIComponent(B)}?recursive=1`,RAW=`https://raw.githubusercontent.com/${R}/${encodeURIComponent(B)}/`;let loaded=false,L=null;async function lib(){if(L)return L;L=await import("https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.mjs");L.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.mjs";return L}function st(t){document.getElementById("statusPTP").innerText=t}function nome(p){return p.split("/").pop().replace(/\.pdf$/i,"").replace(/_/g," ")}window.iniciarPTP=async()=>{if(loaded)return;try{st("Carregando PTPs...");let r=await fetch(API),j=await r.json(),a=(j.tree||[]).filter(x=>x.type==="blob"&&/(^|\/)PTP[^/]*\.pdf$/i.test(x.path)).sort((a,b)=>a.path.localeCompare(b.path,"pt-BR",{numeric:true})),box=document.getElementById("listaPTP");box.innerHTML="";a.forEach(x=>{let b=document.createElement("button");b.className="ptp-item";b.innerText=nome(x.path);b.onclick=()=>abrir(x.path,b);box.appendChild(b)});loaded=true;st(a.length+" PTP(s) encontrado(s). Selecione um documento.")}catch(e){st("Erro: "+e.message)}};async function abrir(path,btn){document.querySelectorAll(".ptp-item").forEach(x=>x.classList.remove("ativo"));btn.classList.add("ativo");let v=document.getElementById("visualizadorPTP"),out=document.getElementById("paginasPTP");v.classList.add("mostrar");document.getElementById("tituloPTP").innerText=nome(path);out.innerHTML="Carregando PDF em alta resolução...";let P=await(await lib()).getDocument({url:RAW+path.split("/").map(encodeURIComponent).join("/")}).promise;out.innerHTML="";let w=Math.max(280,Math.min(document.querySelector(".container").clientWidth-70,1050)),m=Number(navigator.deviceMemory||4),q=m>=8?4:m>=4?3.25:2.5,cap=m>=8?28000000:m>=4?20000000:14000000;for(let n=1;n<=P.numPages;n++){let pg=await P.getPage(n),base=pg.getViewport({scale:1}),vp=pg.getViewport({scale:Math.max(.5,Math.min(2,w/base.width))}),mult=Math.max(devicePixelRatio||1,2)*q,px=vp.width*vp.height*mult*mult;if(px>cap)mult*=Math.sqrt(cap/px);mult=Math.max(2,Math.min(mult,6));let d=document.createElement("div"),lab=document.createElement("div"),c=document.createElement("canvas");d.className="ptp-pagina";lab.className="ptp-numero";lab.innerText=`Página ${n} de ${P.numPages}`;c.width=Math.floor(vp.width*mult);c.height=Math.floor(vp.height*mult);c.style.width=Math.floor(vp.width)+"px";c.style.height=Math.floor(vp.height)+"px";d.append(lab,c);out.appendChild(d);let ctx=c.getContext("2d",{alpha:false});ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality="high";await pg.render({canvasContext:ctx,viewport:vp,transform:[mult,0,0,mult,0,0]}).promise;await new Promise(r=>setTimeout(r,0))}}</script></body>
 </html>
