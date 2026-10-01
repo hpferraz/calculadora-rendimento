@@ -827,7 +827,7 @@ body.home-ativa .cabecalho{display:none}body.home-ativa{padding-top:12px}
       </div></div>
       <div class="home-panel"><div class="home-panel-head"><div class="grid">▦</div><div><h2>MÓDULOS</h2><p>Acesse as ferramentas de gestão e indicadores</p></div></div><div class="home-mods">
         <button class="home-mod hc" onclick="mostrarTela('telaCalculadora')"><div class="home-icon">🧮</div><h3>CALCULADORA</h3><p>Calcule o rendimento e simule cenários de produção.</p><span class="home-arrow">→</span></button>
-        <button class="home-mod hr" onclick="mostrarTela('telaPrecos')"><div class="home-icon">📊</div><h3>ROL/kg</h3><p>Acompanhe ROL e margem por período, mercado e produto.</p><span class="home-arrow">→</span></button>
+        <button class="home-mod hr" onclick="mostrarTela('telaPrecos')"><div class="home-icon">📊</div><h3>ROL/kg</h3><p>Acompanhe ROL e Lucro Bruto por período, mercado e produto. Verifique preço de embalagens.</p><span class="home-arrow">→</span></button>
         <button class="home-mod hq" onclick="mostrarTela('telaICQuente'); iniciarICQuente();"><div class="home-icon">🔥</div><h3>IC ÁREA QUENTE</h3><p>Indicadores da área quente por período e área.</p><span class="home-arrow">→</span></button>
         <button class="home-mod hct" onclick="mostrarTela('telaICCortes'); iniciarICCortes();"><div class="home-icon">🧊</div><h3>IC CORTES</h3><p>Indicadores da sala de cortes por família e período.</p><span class="home-arrow">→</span></button>
         <button class="home-mod hs" onclick="mostrarTela('telaICSobrepeso'); iniciarICSobrepeso();"><div class="home-icon">⚖️</div><h3>IC SOBREPESO</h3><p>Acompanhe os indicadores de sobrepeso e lançamentos.</p><span class="home-arrow">→</span></button>
@@ -854,6 +854,17 @@ body.home-ativa .cabecalho{display:none}body.home-ativa{padding-top:12px}
             <div class="campo">
                 <label for="peso">Peso médio do frango (kg)</label>
                 <input type="number" id="peso" placeholder="Ex.: 2,850" min="0" step="0.001">
+            </div>
+        </div>
+
+        <div id="cardEmbalagens" class="card" style="display:none">
+            <div class="titulo">Embalagens</div>
+            <div id="statusEmbalagens" class="status">Aguardando carregamento da planilha...</div>
+            <div class="tabela-wrapper">
+                <table class="tabela-precos" id="tabelaEmbalagens">
+                    <thead><tr><th>Item</th><th>Descrição</th><th>Uni. Medida</th><th>Preço</th></tr></thead>
+                    <tbody></tbody>
+                </table>
             </div>
         </div>
 
@@ -946,7 +957,7 @@ body.home-ativa .cabecalho{display:none}body.home-ativa{padding-top:12px}
         </div>
     </section>
 
-    <!-- ================= ROL / MARGEM ================= -->
+    <!-- ================= ROL / LUCRO BRUTO / EMBALAGENS ================= -->
     <section id="telaPrecos" class="view">
 
         <button class="botao-voltar" onclick="mostrarTela('telaInicial')">← Voltar</button>
@@ -961,7 +972,10 @@ body.home-ativa .cabecalho{display:none}body.home-ativa{padding-top:12px}
                     ROL/kg
                 </button>
                 <button id="btnMargem" class="indicador-btn" onclick="selecionarIndicador('margem')">
-                    Margem (R$/kg)
+                    Lucro Bruto (R$/kg)
+                </button>
+                <button id="btnEmbalagens" class="indicador-btn" onclick="selecionarIndicador('embalagens')">
+                    Embalagens
                 </button>
             </div>
         </div>
@@ -1396,7 +1410,7 @@ function mostrarErro(mensagem){
    LEITOR DA ABA "PREÇOS"
 
    O arquivo utilizado pelo site deve estar no mesmo diretório:
-   precos.xlsb
+   precos.xlsx
 
    A leitura é dinâmica:
    - não fixa quantidade de linhas;
@@ -1406,7 +1420,8 @@ function mostrarErro(mensagem){
    - identifica família/mercado/produto.
    ========================================================= */
 
-const ARQUIVO_PRECOS = "precos.xlsb";
+const ARQUIVO_PRECOS = "precos.xlsx";
+const ARQUIVO_EMBALAGENS = "embalagens.xlsx";
 
 let excelCarregado = false;
 let dadosPrecos = [];
@@ -1553,7 +1568,7 @@ async function carregarPrecos(){
 
         mostrarStatus(
             "Erro ao carregar os preços: " + erro.message +
-            ". Verifique se o arquivo está como 'precos.xlsb' e está no mesmo local do index.html.",
+            ". Verifique se o arquivo está como 'precos.xlsx' e está no mesmo local do index.html.",
             "erro"
         );
     }
@@ -1568,7 +1583,7 @@ function interpretarTabelaPrecos(matriz){
 
     /*
       Estrutura atual:
-      - linha acima do cabeçalho: ROL (R$/kg) / Margem (R$/kg)
+      - linha acima do cabeçalho: ROL (R$/kg) / Lucro Bruto (R$/kg)
       - cabeçalho: FAMÍLIA / MERCADO PRINCIPAL / PRODUTO / meses
       - abaixo: produtos.
 
@@ -1633,7 +1648,7 @@ function interpretarTabelaPrecos(matriz){
                 temROL=true;
             }
 
-            if(valor.includes("MARGEM") && valor.includes("R$/KG")){
+            if((valor.includes("LUCRO BRUTO") || valor.includes("MARGEM")) && valor.includes("R$/KG")){
                 temMargem=true;
             }
         }
@@ -1661,7 +1676,7 @@ function interpretarTabelaPrecos(matriz){
             if(tipo.includes("ROL")){
                 colunasROL.push({col:c,mes});
             }
-            else if(tipo.includes("MARGEM")){
+            else if(tipo.includes("LUCRO BRUTO") || tipo.includes("MARGEM")){
                 colunasMargem.push({col:c,mes});
             }
         }
@@ -1961,22 +1976,43 @@ function montarMercados(){
     }
 }
 
+let embalagensCarregadas=false;
+async function carregarEmbalagens(){
+    if(embalagensCarregadas) return;
+    const status=document.getElementById("statusEmbalagens"),tbody=document.querySelector("#tabelaEmbalagens tbody");
+    try{
+        status.innerText="Carregando embalagens...";
+        const resposta=await fetch(ARQUIVO_EMBALAGENS+"?v="+Date.now());
+        if(!resposta.ok) throw new Error("HTTP "+resposta.status);
+        const buffer=await resposta.arrayBuffer(),wb=XLSX.read(buffer,{type:"array"}),ws=wb.Sheets[wb.SheetNames[0]];
+        const matriz=XLSX.utils.sheet_to_json(ws,{header:1,defval:"",raw:true});
+        if(!matriz.length) throw new Error("Planilha sem dados");
+        const cab=matriz[0].map(v=>textoLimpo(v).toUpperCase());
+        const iItem=cab.findIndex(v=>v==="ITEM"),iDesc=cab.findIndex(v=>v.includes("DESCRI")),iUni=cab.findIndex(v=>v.includes("UNI")&&v.includes("MEDIDA")),iPreco=cab.findIndex(v=>v.includes("PREÇO")||v.includes("PRECO"));
+        if([iItem,iDesc,iUni,iPreco].some(i=>i<0)) throw new Error("Cabeçalhos ITEM, DESCRIÇÃO, UNI MEDIDA ou PREÇO não encontrados");
+        tbody.innerHTML="";let total=0;
+        matriz.slice(1).forEach(l=>{
+            if(l.every(v=>textoLimpo(v)==="")) return;
+            const tr=document.createElement("tr");tr.className="produto-linha";
+            const preco=Number(l[iPreco]);
+            [l[iItem],l[iDesc],l[iUni],Number.isFinite(preco)?preco.toLocaleString("pt-BR",{style:"currency",currency:"BRL",minimumFractionDigits:2,maximumFractionDigits:4}):textoLimpo(l[iPreco])].forEach((v,i)=>{const td=document.createElement("td");td.innerText=v; if(i===1)td.className="produto";tr.appendChild(td)});
+            tbody.appendChild(tr); total++;
+        });
+        status.innerText=total+" embalagem(ns) carregada(s).";embalagensCarregadas=true;
+    }catch(e){status.innerText="Erro ao carregar embalagens: "+e.message;}
+}
+
 function selecionarIndicador(tipo){
-
     indicadorSelecionado=tipo;
-
-    document.getElementById("btnROL")
-        .classList.toggle("ativo",tipo==="rol");
-
-    document.getElementById("btnMargem")
-        .classList.toggle("ativo",tipo==="margem");
-
-    document.getElementById("infoIndicador").innerText=
-        tipo==="rol" ? "ROL/kg" : "Margem (R$/kg)";
-
-    montarMeses();
-    montarMercados();
-    renderTabelaPrecos();
+    document.getElementById("btnROL").classList.toggle("ativo",tipo==="rol");
+    document.getElementById("btnMargem").classList.toggle("ativo",tipo==="margem");
+    document.getElementById("btnEmbalagens").classList.toggle("ativo",tipo==="embalagens");
+    const emb=tipo==="embalagens";
+    document.getElementById("cardEmbalagens").style.display=emb?"block":"none";
+    document.querySelectorAll("#telaPrecos .preco-detalhe").forEach(el=>el.style.display=emb?"none":"block");
+    if(emb){carregarEmbalagens();return;}
+    document.getElementById("infoIndicador").innerText=tipo==="rol" ? "ROL/kg" : "Lucro Bruto (R$/kg)";
+    montarMeses();montarMercados();renderTabelaPrecos();
 }
 
 function alterarPeriodoSelect(){
