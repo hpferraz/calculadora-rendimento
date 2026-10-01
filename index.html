@@ -808,7 +808,25 @@ body.home-ativa .cabecalho{display:none}body.home-ativa{padding-top:12px}
 @media(max-width:800px){.home-mods{grid-template-columns:repeat(2,1fr)}.ptp-lista{grid-template-columns:1fr}}
 @media(max-width:650px){body.home-ativa{padding:8px}.home-hero{min-height:310px;border-radius:16px;background-position:58% center}.home-hero-in{min-height:310px;padding:22px 20px}.home-logo{width:110px}.home-line{height:46px}.home-title h1{font-size:18px}.home-title p{font-size:14px}.home-welcome{max-width:92%}.home-welcome h2{font-size:23px}.home-welcome p{font-size:13px}.home-panel{padding:16px;border-radius:16px}.home-mods{grid-template-columns:1fr;gap:12px}.home-mod{min-height:175px;padding:18px 16px 24px}.home-icon{width:58px;height:58px;font-size:27px}}
 
-.ptp-progresso-box{width:100%;max-width:560px;margin:18px auto;padding:16px;background:#f5f6f8;border-radius:12px;text-align:center}.ptp-progresso-texto{font-weight:bold;color:#444;margin-bottom:9px}.ptp-progresso-trilho{height:12px;background:#ddd;border-radius:999px;overflow:hidden}.ptp-progresso-barra{height:100%;width:0;background:linear-gradient(90deg,#e30613,#ff5b35);border-radius:999px;transition:width .2s ease}.ptp-progresso-detalhe{font-size:12px;color:#777;margin-top:7px}</style>
+.ptp-progresso-box{width:100%;max-width:560px;margin:18px auto;padding:16px;background:#f5f6f8;border-radius:12px;text-align:center}.ptp-progresso-texto{font-weight:bold;color:#444;margin-bottom:9px}.ptp-progresso-trilho{height:12px;background:#ddd;border-radius:999px;overflow:hidden}.ptp-progresso-barra{height:100%;width:0;background:linear-gradient(90deg,#e30613,#ff5b35);border-radius:999px;transition:width .2s ease}.ptp-progresso-detalhe{font-size:12px;color:#777;margin-top:7px}
+/* Embalagens - ajustes exclusivos deste quadro */
+#cardEmbalagens .tabela-wrapper{width:100%;max-width:100%;overflow-x:hidden}
+#tabelaEmbalagens{width:100%;max-width:100%;min-width:0;table-layout:fixed;font-size:80%}
+#tabelaEmbalagens th,#tabelaEmbalagens td{padding:5px 3px;white-space:normal;overflow-wrap:break-word;word-break:normal;line-height:1.15}
+#tabelaEmbalagens th:nth-child(1),#tabelaEmbalagens td:nth-child(1){width:16%;text-align:center}
+#tabelaEmbalagens th:nth-child(2),#tabelaEmbalagens td:nth-child(2){width:45%;text-align:left}
+#tabelaEmbalagens th:nth-child(3),#tabelaEmbalagens td:nth-child(3){width:17%;text-align:center}
+#tabelaEmbalagens th:nth-child(4),#tabelaEmbalagens td:nth-child(4){width:22%;text-align:right;white-space:nowrap}
+@media(max-width:650px){
+ #cardEmbalagens{padding-left:8px;padding-right:8px}
+ #tabelaEmbalagens{font-size:72%}
+ #tabelaEmbalagens th,#tabelaEmbalagens td{padding:4px 2px}
+ #tabelaEmbalagens th:nth-child(1),#tabelaEmbalagens td:nth-child(1){width:15%}
+ #tabelaEmbalagens th:nth-child(2),#tabelaEmbalagens td:nth-child(2){width:44%}
+ #tabelaEmbalagens th:nth-child(3),#tabelaEmbalagens td:nth-child(3){width:17%}
+ #tabelaEmbalagens th:nth-child(4),#tabelaEmbalagens td:nth-child(4){width:24%}
+}
+</style>
 </head>
 
 <body class="home-ativa">
@@ -1990,7 +2008,7 @@ async function carregarEmbalagens(){
         for(const l of dados.slice(1)){
             if(l.every(v=>textoLimpo(v)===""))continue;
             const tr=document.createElement("tr");tr.className="produto-linha";
-            const preco=Number(l[ix[3]]), campos=[l[ix[0]],l[ix[1]],l[ix[2]],Number.isFinite(preco)?preco.toLocaleString("pt-BR",{style:"currency",currency:"BRL",minimumFractionDigits:2,maximumFractionDigits:4}):l[ix[3]]];
+            const preco=Number(l[ix[3]]), campos=[l[ix[0]],l[ix[1]],l[ix[2]],Number.isFinite(preco)?preco.toLocaleString("pt-BR",{style:"currency",currency:"BRL",minimumFractionDigits:2,maximumFractionDigits:2}):l[ix[3]]];
             campos.forEach((v,i)=>{let td=document.createElement("td");td.innerText=v??"";if(i===1)td.className="produto";tr.appendChild(td)});tbody.appendChild(tr);total++;
         }
         status.innerText=total+" embalagem(ns) carregada(s).";embalagensCarregadas=true;
