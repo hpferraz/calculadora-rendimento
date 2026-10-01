@@ -857,17 +857,6 @@ body.home-ativa .cabecalho{display:none}body.home-ativa{padding-top:12px}
             </div>
         </div>
 
-        <div id="cardEmbalagens" class="card" style="display:none">
-            <div class="titulo">Embalagens</div>
-            <div id="statusEmbalagens" class="status">Aguardando carregamento da planilha...</div>
-            <div class="tabela-wrapper">
-                <table class="tabela-precos" id="tabelaEmbalagens">
-                    <thead><tr><th>Item</th><th>Descrição</th><th>Uni. Medida</th><th>Preço</th></tr></thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-        </div>
-
         <div class="card">
             <div class="titulo">Selecione a Família</div>
 
@@ -957,7 +946,7 @@ body.home-ativa .cabecalho{display:none}body.home-ativa{padding-top:12px}
         </div>
     </section>
 
-    <!-- ================= ROL / LUCRO BRUTO / EMBALAGENS ================= -->
+    <!-- ================= ROL / MARGEM ================= -->
     <section id="telaPrecos" class="view">
 
         <button class="botao-voltar" onclick="mostrarTela('telaInicial')">← Voltar</button>
@@ -980,7 +969,15 @@ body.home-ativa .cabecalho{display:none}body.home-ativa{padding-top:12px}
             </div>
         </div>
 
-        <div class="card">
+        <div id="cardEmbalagens" class="card" style="display:none">
+            <div class="titulo">Embalagens</div>
+            <div id="statusEmbalagens" class="status">Aguardando carregamento...</div>
+            <div class="tabela-wrapper"><table class="tabela-precos" id="tabelaEmbalagens">
+                <thead><tr><th>ITEM</th><th class="produto-col">DESCRIÇÃO</th><th>UNI MEDIDA</th><th>PREÇO</th></tr></thead><tbody></tbody>
+            </table></div>
+        </div>
+
+        <div class="card preco-detalhe">
             <div class="titulo">Selecione a Família</div>
 
             <div class="familias" id="familiasPrecos"></div>
@@ -990,7 +987,7 @@ body.home-ativa .cabecalho{display:none}body.home-ativa{padding-top:12px}
             </div>
         </div>
 
-        <div class="card">
+        <div class="card preco-detalhe">
             <div class="titulo">Filtros</div>
 
             <div class="filtros-grid">
@@ -1034,7 +1031,7 @@ body.home-ativa .cabecalho{display:none}body.home-ativa{padding-top:12px}
             </div>
         </div>
 
-        <div class="card">
+        <div class="card preco-detalhe">
             <div class="info-precos">
                 <div class="info-item">
                     <div class="label">Indicador</div>
@@ -1410,7 +1407,7 @@ function mostrarErro(mensagem){
    LEITOR DA ABA "PREÇOS"
 
    O arquivo utilizado pelo site deve estar no mesmo diretório:
-   precos.xlsx
+   precos.xlsb
 
    A leitura é dinâmica:
    - não fixa quantidade de linhas;
@@ -1568,7 +1565,7 @@ async function carregarPrecos(){
 
         mostrarStatus(
             "Erro ao carregar os preços: " + erro.message +
-            ". Verifique se o arquivo está como 'precos.xlsx' e está no mesmo local do index.html.",
+            ". Verifique se o arquivo está como 'precos.xlsb' e está no mesmo local do index.html.",
             "erro"
         );
     }
@@ -1978,40 +1975,37 @@ function montarMercados(){
 
 let embalagensCarregadas=false;
 async function carregarEmbalagens(){
-    if(embalagensCarregadas) return;
-    const status=document.getElementById("statusEmbalagens"),tbody=document.querySelector("#tabelaEmbalagens tbody");
+    const status=document.getElementById("statusEmbalagens"), tbody=document.querySelector("#tabelaEmbalagens tbody");
+    if(embalagensCarregadas){return;}
     try{
         status.innerText="Carregando embalagens...";
-        const resposta=await fetch(ARQUIVO_EMBALAGENS+"?v="+Date.now());
-        if(!resposta.ok) throw new Error("HTTP "+resposta.status);
-        const buffer=await resposta.arrayBuffer(),wb=XLSX.read(buffer,{type:"array"}),ws=wb.Sheets[wb.SheetNames[0]];
-        const matriz=XLSX.utils.sheet_to_json(ws,{header:1,defval:"",raw:true});
-        if(!matriz.length) throw new Error("Planilha sem dados");
-        const cab=matriz[0].map(v=>textoLimpo(v).toUpperCase());
-        const iItem=cab.findIndex(v=>v==="ITEM"),iDesc=cab.findIndex(v=>v.includes("DESCRI")),iUni=cab.findIndex(v=>v.includes("UNI")&&v.includes("MEDIDA")),iPreco=cab.findIndex(v=>v.includes("PREÇO")||v.includes("PRECO"));
-        if([iItem,iDesc,iUni,iPreco].some(i=>i<0)) throw new Error("Cabeçalhos ITEM, DESCRIÇÃO, UNI MEDIDA ou PREÇO não encontrados");
+        const r=await fetch(ARQUIVO_EMBALAGENS+"?v="+Date.now());
+        if(!r.ok) throw new Error("HTTP "+r.status);
+        const wb=XLSX.read(await r.arrayBuffer(),{type:"array"}), ws=wb.Sheets[wb.SheetNames[0]];
+        const dados=XLSX.utils.sheet_to_json(ws,{header:1,defval:"",raw:true});
+        const h=(dados[0]||[]).map(v=>textoLimpo(v).toUpperCase());
+        const ix=[h.indexOf("ITEM"),h.findIndex(v=>v.includes("DESCRI")),h.findIndex(v=>v.includes("UNI")&&v.includes("MEDIDA")),h.findIndex(v=>v.includes("PREÇO")||v.includes("PRECO"))];
+        if(ix.some(i=>i<0))throw new Error("Cabeçalhos da tabela não encontrados");
         tbody.innerHTML="";let total=0;
-        matriz.slice(1).forEach(l=>{
-            if(l.every(v=>textoLimpo(v)==="")) return;
+        for(const l of dados.slice(1)){
+            if(l.every(v=>textoLimpo(v)===""))continue;
             const tr=document.createElement("tr");tr.className="produto-linha";
-            const preco=Number(l[iPreco]);
-            [l[iItem],l[iDesc],l[iUni],Number.isFinite(preco)?preco.toLocaleString("pt-BR",{style:"currency",currency:"BRL",minimumFractionDigits:2,maximumFractionDigits:4}):textoLimpo(l[iPreco])].forEach((v,i)=>{const td=document.createElement("td");td.innerText=v; if(i===1)td.className="produto";tr.appendChild(td)});
-            tbody.appendChild(tr); total++;
-        });
+            const preco=Number(l[ix[3]]), campos=[l[ix[0]],l[ix[1]],l[ix[2]],Number.isFinite(preco)?preco.toLocaleString("pt-BR",{style:"currency",currency:"BRL",minimumFractionDigits:2,maximumFractionDigits:4}):l[ix[3]]];
+            campos.forEach((v,i)=>{let td=document.createElement("td");td.innerText=v??"";if(i===1)td.className="produto";tr.appendChild(td)});tbody.appendChild(tr);total++;
+        }
         status.innerText=total+" embalagem(ns) carregada(s).";embalagensCarregadas=true;
     }catch(e){status.innerText="Erro ao carregar embalagens: "+e.message;}
 }
-
 function selecionarIndicador(tipo){
-    indicadorSelecionado=tipo;
+    const emb=tipo==="embalagens";
+    indicadorSelecionado=emb?"rol":tipo; // evita que as rotinas existentes recebam um terceiro indicador desconhecido
     document.getElementById("btnROL").classList.toggle("ativo",tipo==="rol");
     document.getElementById("btnMargem").classList.toggle("ativo",tipo==="margem");
-    document.getElementById("btnEmbalagens").classList.toggle("ativo",tipo==="embalagens");
-    const emb=tipo==="embalagens";
+    document.getElementById("btnEmbalagens").classList.toggle("ativo",emb);
     document.getElementById("cardEmbalagens").style.display=emb?"block":"none";
     document.querySelectorAll("#telaPrecos .preco-detalhe").forEach(el=>el.style.display=emb?"none":"block");
     if(emb){carregarEmbalagens();return;}
-    document.getElementById("infoIndicador").innerText=tipo==="rol" ? "ROL/kg" : "Lucro Bruto (R$/kg)";
+    document.getElementById("infoIndicador").innerText=tipo==="rol"?"ROL/kg":"Lucro Bruto (R$/kg)";
     montarMeses();montarMercados();renderTabelaPrecos();
 }
 
