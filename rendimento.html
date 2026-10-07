@@ -82,16 +82,25 @@ function applyBorder(td,border){
   for(let name of ['top','right','bottom','left']){let q=side(name);if(q){td.style['border-'+name]=q.st+' '+(q.col||'#999')}}
 }
 function isHeatRow(r){return false}
-function applyB100TurnCompare(td,row,col,x){
-  // In B100 por Turno, each family is the pair of rows T1/T2.
-  // For each family and period, higher B100 is better: higher = green, lower = red.
-  if(row<111||row>140||x===null||x===undefined||!Number.isFinite(x))return false;
-  const pairStart=(row%2===1)?row:row-1;
-  const r1=DATA.rowsByExcel[pairStart],r2=DATA.rowsByExcel[pairStart+1];
-  if(!r1||!r2)return false;
-  const a=n(r1.vals[colName(col)]),b=n(r2.vals[colName(col)]);
-  if(a===null||b===null||a===b)return false;
-  td.style.background=x>a && x>b ? '#63BE7B' : x<a && x<b ? '#F8696B' : (x>a?'#63BE7B':'#F8696B');
+function aplicarB100Turno(td,row,col,x){
+  // B100 por Turno: cada família ocupa EXATAMENTE duas linhas consecutivas.
+  // Dentro de cada coluna (mês ou dia): maior valor = verde, menor valor = vermelho.
+  if(row<111||row>140||x===null||x===undefined||!Number.isFinite(x)) return false;
+
+  const inicioFamilia = 111 + Math.floor((row-111)/2)*2;
+  const r1 = DATA.rowsByExcel[inicioFamilia];
+  const r2 = DATA.rowsByExcel[inicioFamilia+1];
+  if(!r1 || !r2) return false;
+
+  const nomeCol = colName(col);
+  const a = n(r1.vals[nomeCol]);
+  const b = n(r2.vals[nomeCol]);
+  if(a===null || b===null || a===b) return false;
+
+  td.classList.remove('cf-turn-red','cf-turn-green');
+  // Usa !important via as classes para impedir que a formatação condicional
+  // original da planilha sobrescreva a comparação T1 x T2.
+  td.classList.add(x===Math.max(a,b) ? 'cf-turn-green' : 'cf-turn-red');
   return true;
 }
 
@@ -108,7 +117,7 @@ for(const part of ['C','D']){const idx=part==='C'?2:3;const m=mergeAt(idx,r.r);c
   if(m)td.rowSpan=visibleSpan(m);
   lerBaseStyle(td,r.labelStyles[part]);applyBorder(td,r.labelStyles[part]?.border);tr.appendChild(td);}
 let mt=document.createElement('td');mt.className='meta';mt.textContent=fmt(r.vals[DATA.metaCol],r,DATA.metaCol);lerBaseStyle(mt,r.styles[DATA.metaCol]);applyBorder(mt,r.styles[DATA.metaCol]?.border);applyConditionalFormatting(mt,r.r,colNum(DATA.metaCol),n(r.vals[DATA.metaCol]));tr.appendChild(mt);
-cols.forEach(c=>{let td=document.createElement('td'),x=n(r.vals[c]);td.textContent=fmt(r.vals[c],r,c);td.style.width='56px';td.style.minWidth='56px';td.style.maxWidth='56px';lerBaseStyle(td,r.styles[c]);applyBorder(td,r.styles[c]?.border);applyConditionalFormatting(td,r.r,colNum(c),x);if(group==='performance'&&r.r>=111&&r.r<=140)applyB100TurnCompare(td,r.r,colNum(c),x);tr.appendChild(td)});t.appendChild(tr)}
+cols.forEach(c=>{let td=document.createElement('td'),x=n(r.vals[c]);td.textContent=fmt(r.vals[c],r,c);td.style.width='56px';td.style.minWidth='56px';td.style.maxWidth='56px';lerBaseStyle(td,r.styles[c]);applyBorder(td,r.styles[c]?.border);applyConditionalFormatting(td,r.r,colNum(c),x);if(group==='performance'&&r.r>=111&&r.r<=140)aplicarB100Turno(td,r.r,colNum(c),x);tr.appendChild(td)});t.appendChild(tr)}
 status.textContent=(group==='condenacoes'?'Condenações':'Performance')+' • '+(view==='mes'?'Meses':'Dias')+' • somente linhas/colunas visíveis do Excel'}
 
 async function load(){try{let res=await fetch('00.%20Rendimento%20GUA.xlsm',{cache:'no-store'});if(!res.ok)throw Error('HTTP '+res.status);let w=XLSX.read(await res.arrayBuffer(),{cellStyles:true,cellFormula:true,cellNF:true,cellDates:false}),s=w.Sheets['Painel'];if(!s)throw Error('Aba Painel não encontrada');let range=XLSX.utils.decode_range(s['!ref']||'A1:A1'),headerRow=1;
