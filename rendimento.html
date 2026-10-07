@@ -84,14 +84,14 @@ function applyBorder(td,border){
 function isHeatRow(r){return false}
 function applyB100TurnCompare(td,row,col,x){
   // In B100 por Turno, each family is the pair of rows T1/T2.
-  // Higher B100 is the worse result in this panel: higher = red, lower = green.
+  // For each family and period, higher B100 is better: higher = green, lower = red.
   if(row<111||row>140||x===null||x===undefined||!Number.isFinite(x))return false;
   const pairStart=(row%2===1)?row:row-1;
   const r1=DATA.rowsByExcel[pairStart],r2=DATA.rowsByExcel[pairStart+1];
   if(!r1||!r2)return false;
   const a=n(r1.vals[colName(col)]),b=n(r2.vals[colName(col)]);
   if(a===null||b===null||a===b)return false;
-  td.style.background=x>a && x>b ? '#F8696B' : x<a && x<b ? '#63BE7B' : (x>a?'#F8696B':'#63BE7B');
+  td.style.background=x>a && x>b ? '#63BE7B' : x<a && x<b ? '#F8696B' : (x>a?'#63BE7B':'#F8696B');
   return true;
 }
 
