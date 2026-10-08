@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>B100 Dia | Guapiaçu</title>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:Arial,Helvetica,sans-serif;background:#f2f4f7;color:#222}
+body{padding:0}
+.top{background:linear-gradient(115deg,#285f88,#397eae);color:#fff;padding:14px 10px}
+.top h1{font-size:19px;margin:0}.top p{font-size:10px;margin:3px 0 0}
+.backwrap{padding:8px}.back{border:0;border-radius:8px;background:#333;color:#fff;padding:8px 12px;font-size:11px;font-weight:700;cursor:pointer}
+.card{margin:0 8px 8px;background:#fff;border-radius:12px;box-shadow:0 2px 8px #0001;overflow:hidden}
+.status{padding:9px 10px;color:#666;font-size:10px;border-bottom:1px solid #ddd}
+.viewer{padding:8px;background:#dfe3e8;overflow:auto;-webkit-overflow-scrolling:touch}
+#b100Canvas{display:block;background:#fff;max-width:none;cursor:zoom-in;box-shadow:0 1px 4px #0002}
+.hint{padding:7px 9px;background:#fff;font-size:10px;color:#666;text-align:center}
+.err{padding:20px;text-align:center;color:#b00000;font-weight:700}
+.overlay{display:none;position:fixed;inset:0;background:#000;z-index:9999;align-items:center;justify-content:center;touch-action:none}
+.overlay.show{display:flex}
+.overlay canvas{max-width:100vw;max-height:100vh;width:auto;height:auto;object-fit:contain;background:#fff;cursor:zoom-out}
+.close{position:absolute;right:max(10px,env(safe-area-inset-right));top:max(10px,env(safe-area-inset-top));z-index:10000;width:38px;height:38px;border:0;border-radius:50%;background:#000b;color:#fff;font-size:23px;font-weight:700;cursor:pointer}
+@media(max-width:650px){.top{padding:11px 8px}.top h1{font-size:17px}.viewer{padding:4px}.hint{font-size:9px}}
+</style>
+</head>
+<body>
+<header class="top"><h1>B100 Dia</h1><p>Unidade Guapiaçu</p></header>
+<div class="backwrap"><button class="back" onclick="location.href='rendimento-menu.html'">← Voltar aos Módulos de Rendimento</button></div>
+<section class="card">
+  <div id="status" class="status">Carregando Painel B100...</div>
+  <div class="viewer"><canvas id="b100Canvas"></canvas></div>
+  <div class="hint">Toque na imagem para abrir em tela cheia e visualizar na horizontal.</div>
+</section>
+<div id="overlay" class="overlay" aria-label="Visualização ampliada">
+  <button class="close" onclick="fecharTelaCheia()" aria-label="Fechar">×</button>
+  <canvas id="fullscreenCanvas"></canvas>
+</div>
+<script>
+const ARQUIVO='00.%20Rendimento%20GUA.xlsm';
+const ABA='Painel B100';
+const RANGE={r1:3,r2:39,c1:1,c2:19};
+const q=id=>document.getElementById(id);
+const num=v=>{const n=Number(v);return Number.isFinite(n)?n:null};
+const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+
+function excelDateText(v,fmt){
+  const n=num(v);
+  if(n===null)return String(v??'');
+  const d=XLSX.SSF.parse_date_code(n);
+  if(!d)return String(v??'');
+  const z=String(fmt||'').toLowerCase();
+  if(z.includes('d/m')||z.includes('dd/mm')) return `${d.d}/${d.m}`;
+  if(z.includes('m/d')||z.includes('mm/dd')) return `${d.m}/${d.d}`;
+  return `${String(d.d).padStart(2,'0')}/${String(d.m).padStart(2,'0')}/${d.y}`;
+}
+function displayValue(cell){
+  if(!cell)return '';
+  if(cell.v===null||cell.v===undefined||cell.v==='')return '';
+  if(cell.w!==undefined && cell.w!==null && cell.w!=='' && !String(cell.w).includes('#'))return String(cell.w);
+  if(cell.t==='d' || (typeof cell.v==='number' && /d|m|y/.test(String(cell.z||'').toLowerCase()))) return excelDateText(cell.v,cell.z);
+  return String(cell.v);
+}
+function color(v){
+  if(!v)return null;
+  if(typeof v==='object'){
+    if(v.rgb)return color(v.rgb);
+    return null;
+  }
+  let s=String(v).replace('#','').trim();
+  if(s.length===8)s=s.slice(2);
+  if(/^[0-9a-f]{6}$/i.test(s))return '#'+s;
+  return null;
+}
+function getStyle(cell){
+  const s=cell?.s||{};
+  const fill=s.fill||{};
+  const font=s.font||{};
+  const align=s.alignment||{};
+  return {
+    fill:color(fill.fgColor?.rgb||fill.fgColor),
+    fillType:fill.patternType||'',
+    fontColor:color(font.color?.rgb||font.color)||'#000000',
+    fontFamily:font.name||'Arial',
+    fontSize:Number(font.sz)||11,
+    bold:!!font.bold,
+    italic:!!font.italic,
+    underline:!!font.underline,
+    h:align.horizontal||'center',
+    v:align.vertical||'center',
+    wrap:align.wrapText!==false,
+    rotation:Number(align.textRotation)||0,
+    border:s.border||{}
+  };
+}
+function borderColor(side){return color(side?.color?.rgb||side?.color)||'#808080'}
+function sideWidth(side){
+  const st=String(side?.style||'');
+  return st==='thick'?2.2:st==='medium'?1.6:st==='thin'?1:st==='hair'?0.6:0;
+}
+function drawBorder(ctx,side,x1,y1,x2,y2){
+  const w=sideWidth(side); if(!w)return;
+  ctx.save();ctx.strokeStyle=borderColor(side);ctx.lineWidth=w;ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();ctx.restore();
+}
+function excelColPx(w){
+  // Approximation used by Excel at 96 dpi; preserves the workbook's relative widths.
+  const n=Number(w);
+  return Math.max(4,Math.round(((n||8.43)*7)+5));
+}
+function rowPx(h){return Math.max(2,Math.round((Number(h)||15)*96/72));}
+function getColInfo(ws,c){
+  const cd=ws['!cols']?.[c-1]||{};
+  return {hidden:!!cd.hidden,width:excelColPx(cd.wch??cd.width??8.43)};
+}
+function getRowInfo(ws,r){
+  const rd=ws['!rows']?.[r-1]||{};
+  return {hidden:!!rd.hidden,height:rowPx(rd.hpt??rd.hpx??15)};
+}
+function ref(c,r){return XLSX.utils.encode_cell({c:c-1,r:r-1});}
+function mergedAnchor(ws,c,r){
+  const merges=ws['!merges']||[];
+  for(const m of merges){
+    const minc=m.s.c+1,maxc=m.e.c+1,minr=m.s.r+1,maxr=m.e.r+1;
+    if(c>=minc&&c<=maxc&&r>=minr&&r<=maxr)return m.s.c+1===c&&m.s.r+1===r?null:{c:minc,r:minr,m};
+  }
+  return null;
+}
+function isMergedCovered(ws,c,r){return mergedAnchor(ws,c,r)!==null;}
+function getMerge(ws,c,r){
+  for(const m of (ws['!merges']||[])){
+    const minc=m.s.c+1,maxc=m.e.c+1,minr=m.s.r+1,maxr=m.e.r+1;
+    if(c===minc&&r===minr)return {minc,maxc,minr,maxr};
+  }
+  return null;
+}
+function applyB100Conditional(ctx,ws,c,r,x,y,w,h){
+  // The Painel B100 uses separate two-cell color scales for T1/T2 in C:D, F:G and I:J.
+  const pairs=[[3,4],[6,7],[9,10]];
+  const pair=pairs.find(p=>p.includes(c));
+  if(!pair || r<17 || r>39) return;
+  const a=ws[ref(pair[0],r)], b=ws[ref(pair[1],r)];
+  if(!a||!b)return;
+  const av=num(a.v),bv=num(b.v);
+  if(av===null||bv===null)return;
+  // Excel's min/50th percentile/max scale over two cells makes the lower value red
+  // and the higher value green. Tiny raw floating-point differences are intentionally retained.
+  const lo=Math.min(av,bv),hi=Math.max(av,bv);
+  if(hi===lo)return;
+  const v=num(ws[ref(c,r)]?.v); if(v===null)return;
+  const t=(v-lo)/(hi-lo);
+  const css=t<=0?'#F8696B':t>=1?'#63BE7B':mixColor('#F8696B','#63BE7B',t);
+  ctx.fillStyle=css;ctx.fillRect(x,y,w,h);
+}
+function mixColor(a,b,t){
+  const p=s=>{s=s.replace('#','');return [parseInt(s.slice(0,2),16),parseInt(s.slice(2,4),16),parseInt(s.slice(4,6),16)]};
+  const A=p(a),B=p(b);return '#'+A.map((v,i)=>Math.round(v+(B[i]-v)*t).toString(16).padStart(2,'0')).join('');
+}
+function drawText(ctx,text,st,x,y,w,h){
+  if(!text)return;
+  ctx.save();
+  ctx.fillStyle=st.fontColor;ctx.font=`${st.italic?'italic ':''}${st.bold?'bold ':''}${Math.max(7,st.fontSize*1.333)}px ${st.fontFamily}`;
+  ctx.textAlign=st.h==='left'?'left':st.h==='right'?'right':'center';
+  ctx.textBaseline='middle';
+  const pad=4;
+  let tx=st.h==='left'?x+pad:st.h==='right'?x+w-pad:x+w/2;
+  let ty=y+h/2;
+  if(st.rotation){
+    ctx.translate(tx,ty);ctx.rotate(-st.rotation*Math.PI/180);ctx.fillText(text,0,0);
+  }else{
+    const max=w-pad*2;
+    if(!st.wrap){ctx.fillText(text,tx,ty);}
+    else{
+      const words=String(text).split(/\s+/);let lines=[],line='';
+      for(const word of words){const test=line?line+' '+word:word;if(ctx.measureText(test).width<=max||!line)line=test;else{lines.push(line);line=word}}
+      if(line)lines.push(line);
+      const lh=Math.max(9,st.fontSize*1.25*1.333), start=ty-((lines.length-1)*lh)/2;
+      lines.slice(0,Math.max(1,Math.floor(h/lh))).forEach((ln,i)=>ctx.fillText(ln,tx,start+i*lh));
+    }
+  }
+  if(st.underline){ctx.strokeStyle=st.fontColor;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(tx-ctx.measureText(text).width/2,ty+st.fontSize*.7);ctx.lineTo(tx+ctx.measureText(text).width/2,ty+st.fontSize*.7);ctx.stroke()}
+  ctx.restore();
+}
+function buildLayout(ws){
+  const cols=[];const rows=[];
+  for(let c=RANGE.c1;c<=RANGE.c2;c++){const x=getColInfo(ws,c);if(!x.hidden)cols.push({excel:c,width:x.width})}
+  for(let r=RANGE.r1;r<=RANGE.r2;r++){const x=getRowInfo(ws,r);if(!x.hidden)rows.push({excel:r,height:x.height})}
+  const colPos=new Map();let x=0;for(const c of cols){colPos.set(c.excel,x);x+=c.width}
+  const rowPos=new Map();let y=0;for(const r of rows){rowPos.set(r.excel,y);y+=r.height}
+  return {cols,rows,colPos,rowPos,width:x,height:y};
+}
+function renderWorkbook(ws){
+  const L=buildLayout(ws), canvas=q('b100Canvas'),dpr=Math.max(1,window.devicePixelRatio||1),scale=1;
+  canvas.width=Math.ceil(L.width*dpr);canvas.height=Math.ceil(L.height*dpr);canvas.style.width=L.width+'px';canvas.style.height=L.height+'px';
+  const ctx=canvas.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);ctx.imageSmoothingEnabled=true;
+  ctx.fillStyle='#fff';ctx.fillRect(0,0,L.width,L.height);
+  for(const rr of L.rows){
+    for(const cc of L.cols){
+      const c=cc.excel,r=rr.excel;
+      if(isMergedCovered(ws,c,r))continue;
+      let x=L.colPos.get(c),y=L.rowPos.get(r),w=cc.width,h=rr.height;
+      const mg=getMerge(ws,c,r);
+      if(mg){
+        w=0;h=0;
+        for(const c2 of L.cols)if(c2.excel>=mg.minc&&c2.excel<=mg.maxc)w+=c2.width;
+        for(const r2 of L.rows)if(r2.excel>=mg.minr&&r2.excel<=mg.maxr)h+=r2.height;
+      }
+      const cell=ws[ref(c,r)],st=getStyle(cell);
+      if(st.fill && st.fillType!=='none'){ctx.fillStyle=st.fill;ctx.fillRect(x,y,w,h);}else{ctx.fillStyle='#fff';ctx.fillRect(x,y,w,h)}
+      applyB100Conditional(ctx,ws,c,r,x,y,w,h);
+      const b=st.border||{};
+      drawBorder(ctx,b.top,x,y,x+w,y);drawBorder(ctx,b.bottom,x,y+h,x+w,y+h);drawBorder(ctx,b.left,x,y,x,y+h);drawBorder(ctx,b.right,x+w,y,x+w,y+h);
+      drawText(ctx,displayValue(cell),st,x,y,w,h);
+    }
+  }
+  q('status').textContent=`Painel B100 • Painel B100!A3:S39 • ${L.cols.length} colunas e ${L.rows.length} linhas visíveis`;
+}
+async function iniciar(){
+  try{
+    const r=await fetch(ARQUIVO,{cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);
+    const wb=XLSX.read(await r.arrayBuffer(),{cellStyles:true,cellNF:true,cellDates:false});
+    const ws=wb.Sheets[ABA];if(!ws)throw new Error('Aba Painel B100 não encontrada');
+    renderWorkbook(ws);
+  }catch(e){q('status').innerHTML='';const d=document.createElement('div');d.className='err';d.textContent='Erro ao carregar o Painel B100: '+e.message;q('status').parentElement.appendChild(d)}
+}
+
+async function abrirTelaCheia(){
+  const src=q('b100Canvas'),dst=q('fullscreenCanvas'),overlay=q('overlay');
+  dst.width=src.width;dst.height=src.height;dst.style.width=src.style.width;dst.style.height=src.style.height;
+  const ctx=dst.getContext('2d');ctx.clearRect(0,0,dst.width,dst.height);ctx.drawImage(src,0,0);
+  overlay.classList.add('show');document.body.style.overflow='hidden';
+  try{if(document.documentElement.requestFullscreen)await document.documentElement.requestFullscreen();}catch{}
+  try{if(screen.orientation?.lock)await screen.orientation.lock('landscape');}catch{}
+}
+async function fecharTelaCheia(){
+  q('overlay').classList.remove('show');document.body.style.overflow='';
+  try{if(document.fullscreenElement)await document.exitFullscreen();}catch{}
+}
+q('b100Canvas').addEventListener('click',abrirTelaCheia);
+q('fullscreenCanvas').addEventListener('click',fecharTelaCheia);
+document.addEventListener('keydown',e=>{if(e.key==='Escape')fecharTelaCheia()});
+window.addEventListener('resize',()=>{if(document.fullscreenElement===null && q('overlay').classList.contains('show')){} });
+iniciar();
+</script>
+</body>
+</html>
